@@ -1,0 +1,149 @@
+/* src/styles/instagram_reels.css */
+.reels-section {
+    padding: 80px 20px;
+    background-color: #fff;
+    border-top: 1px solid #f0f0f0;
+}
+
+.reels-header {
+    text-align: center;
+    margin-bottom: 50px;
+}
+
+.reels-title-wrap {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 12px;
+    margin-bottom: 15px;
+}
+
+.ig-icon {
+    color: #E4405F;
+    /* Instagram Pink */
+}
+
+.reels-header h2 {
+    font-family: 'Playfair Display', serif;
+    font-size: 32px;
+    font-weight: 600;
+    color: #1a1a1a;
+    margin: 0;
+}
+
+.reels-header p {
+    font-size: 16px;
+    color: #666;
+    max-width: 600px;
+    margin: 0 auto;
+}
+
+.reels-grid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 30px;
+    max-width: 1200px;
+    margin: 0 auto;
+}
+
+.reel-card {
+    background: #fff;
+    border-radius: 12px;
+    overflow: hidden;
+    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08);
+    transition: transform 0.3s ease;
+    aspect-ratio: 9 / 16;
+    display: flex;
+    flex-direction: column;
+}
+
+.reel-card:hover {
+    transform: translateY(-5px);
+}
+
+.reel-view-link {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 6px;
+    padding: 8px;
+    background: #1a1a1a;
+    color: #fff;
+    font-size: 12px;
+    font-weight: 600;
+    text-decoration: none;
+    letter-spacing: 0.5px;
+    flex-shrink: 0;
+}
+
+.reel-view-link:hover {
+    background: #E4405F;
+}
+
+.reel-iframe-container {
+    width: 100%;
+    height: 100%;
+    position: relative;
+}
+
+.reel-iframe-container iframe {
+    width: 100%;
+    height: 100% !important;
+    border: none;
+    display: block;
+}
+
+.reels-footer {
+    text-align: center;
+    margin-top: 50px;
+}
+
+.reels-follow-btn {
+    display: inline-block;
+    padding: 14px 32px;
+    background: #1a1a1a;
+    color: #fff;
+    text-decoration: none;
+    border-radius: 30px;
+    font-weight: 700;
+    font-size: 14px;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    transition: all 0.3s ease;
+}
+
+.reels-follow-btn:hover {
+    background: #000;
+    transform: scale(1.05);
+    box-shadow: 0 10px 20px rgba(0, 0, 0, 0.1);
+}
+
+/* TABLET RESPONSIVE */
+@media (max-width: 1024px) {
+    .reels-grid {
+        grid-template-columns: repeat(2, 1fr);
+        gap: 20px;
+    }
+}
+
+/* MOBILE RESPONSIVE */
+@media (max-width: 600px) {
+    .reels-section {
+        padding: 50px 15px;
+    }
+
+    .reels-header h2 {
+        font-size: 26px;
+    }
+
+    .reels-grid {
+        grid-template-columns: 1fr;
+        gap: 25px;
+    }
+
+    .reel-card {
+        aspect-ratio: 9 / 16;
+        max-width: 350px;
+        margin: 0 auto;
+    }
+}

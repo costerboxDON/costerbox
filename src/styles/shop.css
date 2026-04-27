@@ -1,0 +1,291 @@
+/* src/styles/shop.css */
+
+/* --- LAYOUT CONTAINER --- */
+.shop-container {
+    display: grid;
+    grid-template-columns: 240px 1fr;
+    /* Sidebar | Content */
+    min-height: 100vh;
+    background-color: var(--brand-cream, #F7F5F0);
+}
+
+/* --- SIDEBAR (Desktop) --- */
+.sidebar {
+    padding: 40px;
+    border-right: 1px solid rgba(0, 0, 0, 0.05);
+    position: sticky;
+    top: 100px;
+    /* Below header */
+    height: calc(100vh - 100px);
+    overflow-y: auto;
+}
+
+.filter-group {
+    margin-bottom: 40px;
+}
+
+.filter-title {
+    font-family: 'Playfair Display', serif;
+    font-size: 1.1rem;
+    margin-bottom: 15px;
+    color: var(--text-main, #1C1C1C);
+    font-weight: 600;
+}
+
+.filter-list li {
+    margin-bottom: 10px;
+    font-size: 0.9rem;
+    color: var(--text-muted, #555);
+    cursor: pointer;
+    transition: all 0.3s;
+    list-style: none;
+    position: relative;
+}
+
+.filter-list li:hover {
+    color: var(--brand-beige, #cbb79a);
+    transform: translateX(5px);
+}
+
+.filter-list li.active {
+    color: var(--text-main, #1C1C1C);
+    font-weight: 700;
+}
+
+.filter-list li.active::before {
+    content: '•';
+    position: absolute;
+    left: -15px;
+    color: var(--brand-beige, #cbb79a);
+}
+
+/* --- MOBILE FILTERS --- */
+.mobile-filters {
+    display: none;
+    overflow-x: auto;
+    white-space: nowrap;
+    padding: 10px 15px;
+    background: #fff;
+    position: sticky;
+    top: 70px;
+    /* Below sticky mobile header (70px height) */
+    z-index: 90;
+    border-bottom: 1px solid #eee;
+}
+
+.m-filter-chip {
+    display: inline-block;
+    padding: 6px 16px;
+    margin-right: 8px;
+    border: 1px solid #eee;
+    border-radius: 20px;
+    font-size: 0.8rem;
+    color: #666;
+    background: #f9f9f9;
+    cursor: pointer;
+    transition: all 0.2s;
+}
+
+.m-filter-chip.active {
+    background: #1a1a1a;
+    color: #fff;
+    border-color: #1a1a1a;
+    font-weight: 600;
+}
+
+/* --- MAIN GALLERY --- */
+.main-gallery {
+    padding: 40px 60px;
+}
+
+.gallery-header {
+    margin-bottom: 40px;
+    text-align: center;
+}
+
+.gallery-header h1 {
+    font-family: 'Playfair Display', serif;
+    font-size: 3rem;
+    margin-bottom: 10px;
+    color: var(--text-main, #1C1C1C);
+}
+
+/* --- GRID SYSTEM --- */
+.products-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
+    gap: 30px;
+}
+
+/* --- PRODUCT CARD --- */
+.product-card {
+    display: flex;
+    flex-direction: column;
+    background: transparent;
+    transition: 0.3s;
+    height: 100%;
+}
+
+.img-box {
+    position: relative;
+    width: 100%;
+    aspect-ratio: 3/4;
+    overflow: hidden;
+    margin-bottom: 12px;
+    border-radius: 4px;
+    background-color: #f4f4f4;
+}
+
+.img-box img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    transition: transform 0.6s ease;
+}
+
+.product-card:hover .img-box img {
+    transform: scale(1.05);
+}
+
+.badge {
+    position: absolute;
+    top: 10px;
+    left: 10px;
+    background: #CC0C39;
+    color: #fff;
+    width: 48px;
+    height: 48px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 0.6rem;
+    font-weight: 800;
+    text-transform: uppercase;
+    z-index: 2;
+    line-height: 1.1;
+    text-align: center;
+    box-shadow: 0 2px 8px rgba(204, 12, 57, 0.35);
+}
+
+.card-details {
+    text-align: left;
+    padding: 0 4px;
+    display: flex;
+    flex-direction: column;
+    flex-grow: 1;
+}
+
+.p-region {
+    font-size: 0.7rem;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    color: #999;
+    font-weight: 600;
+    display: block;
+    margin-bottom: 4px;
+}
+
+.p-name {
+    font-family: 'Playfair Display', serif;
+    font-size: 1.25rem;
+    margin-bottom: 6px;
+    color: #1a1a1a;
+    line-height: 1.3;
+
+    /* Line Clamping for Desktop too */
+    display: -webkit-box;
+    -webkit-line-clamp: 2;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    min-height: 2.6em;
+    /* Ensure alignment */
+}
+
+.p-price {
+    font-size: 1rem;
+    font-weight: 500;
+    color: #333;
+    margin-top: auto;
+    /* Push to bottom if needed */
+}
+
+/* BUTTON */
+.add-btn {
+    width: 100%;
+    margin-top: 12px;
+    padding: 10px 0;
+    background: #1a1a1a;
+    color: #fff;
+    text-transform: uppercase;
+    font-size: 0.75rem;
+    font-weight: 700;
+    letter-spacing: 1px;
+    cursor: pointer;
+    transition: all 0.2s;
+    border: none;
+    border-radius: 2px;
+}
+
+.add-btn:hover {
+    background: #333;
+}
+
+/* --- RESPONSIVE MOBILE TWEAKS --- */
+@media (max-width: 900px) {
+    .sidebar {
+        display: none;
+    }
+
+    .mobile-filters {
+        display: block;
+    }
+
+    .shop-container {
+        display: block;
+    }
+
+    .main-gallery {
+        padding: 20px 15px;
+    }
+
+    /* Reduced side padding */
+
+    .products-grid {
+        grid-template-columns: repeat(2, 1fr);
+        /* Force 2 columns */
+        gap: 15px;
+        /* Tighter gap */
+        row-gap: 25px;
+    }
+
+    /* Mobile Titles */
+    .p-name {
+        font-size: 1rem;
+        /* Smaller font on mobile */
+        margin-bottom: 4px;
+        min-height: 2.6em;
+        /* Keep alignment */
+        /* Ellipsis Logic */
+        display: -webkit-box;
+        -webkit-line-clamp: 2;
+        -webkit-box-orient: vertical;
+        overflow: hidden;
+        text-overflow: ellipsis;
+    }
+
+    .p-region {
+        font-size: 0.6rem;
+    }
+
+    .p-price {
+        font-size: 0.9rem;
+    }
+
+    .add-btn {
+        margin-top: 8px;
+        padding: 8px 0;
+        font-size: 0.7rem;
+    }
+}

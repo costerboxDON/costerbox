@@ -1,0 +1,30 @@
+{
+  "name": "costerbox",
+  "version": "0.1.0",
+  "private": true,
+  "scripts": {
+    "dev": "next dev",
+    "build": "next build",
+    "start": "next start",
+    "lint": "eslint"
+  },
+  "dependencies": {
+    "axios": "^1.13.5",
+    "fflate": "^0.8.2",
+    "firebase": "^12.8.0",
+    "india-pincode-lookup": "^1.0.3",
+    "jspdf": "^4.1.0",
+    "jspdf-autotable": "^5.0.7",
+    "lucide-react": "^0.562.0",
+    "next": "^16.2.0-canary.73",
+    "razorpay": "^2.9.6",
+    "react": "^18.3.1",
+    "react-dom": "^18.3.1",
+    "react-quill-new": "^3.8.3"
+  },
+  "devDependencies": {
+    "babel-plugin-react-compiler": "1.0.0",
+    "eslint": "^8.57.1",
+    "eslint-config-next": "^14.2.3"
+  }
+}

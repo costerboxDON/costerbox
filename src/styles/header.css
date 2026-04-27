@@ -1,0 +1,435 @@
+/* src/styles/header.css */
+
+/* --- 1. LAYOUT CONTAINER --- */
+.nav-wrapper {
+    background-color: #ffffff;
+    /* Fallback if var doesn't exist */
+    background-color: var(--brand-white, #ffffff);
+    border-bottom: 1px solid rgba(0, 0, 0, 0.05);
+    position: sticky;
+    /* Sticky Header */
+    top: 0;
+    z-index: 1000;
+    height: 100px;
+    display: flex;
+    align-items: center;
+}
+
+.nav-bar {
+    width: 100%;
+    max-width: 1300px;
+    margin: 0 auto;
+    padding: 0 40px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+/* --- 2. LOGO --- */
+.brand-logo {
+    display: flex;
+    align-items: center;
+}
+
+.logo-img {
+    height: 60px;
+    width: auto;
+    display: block;
+    mix-blend-mode: multiply;
+}
+
+/* --- 3. DESKTOP ICONS (Right Side) --- */
+.desktop-icons {
+    display: flex;
+    align-items: center;
+    gap: 30px;
+}
+
+.icon-link {
+    font-size: 18px;
+    color: #333;
+    color: var(--text-main, #333);
+    cursor: pointer;
+    transition: 0.3s;
+    text-decoration: none;
+    display: flex;
+    align-items: center;
+    gap: 5px;
+    background: none;
+    border: none;
+    padding: 0;
+    font-family: inherit;
+}
+
+.icon-link:hover {
+    color: #666;
+    color: var(--brand-beige, #666);
+    transform: translateY(-2px);
+}
+
+/* --- PRODUCTS DROPDOWN --- */
+.nav-dropdown {
+    position: relative;
+}
+
+.nav-dropdown-trigger {
+    font-size: 14px !important;
+    font-weight: 500;
+    letter-spacing: 0.5px;
+    text-transform: uppercase;
+}
+
+.chevron {
+    transition: transform 0.3s ease;
+}
+
+.chevron.open {
+    transform: rotate(180deg);
+}
+
+.nav-dropdown-menu {
+    position: absolute;
+    top: calc(100% + 12px);
+    left: 50%;
+    transform: translateX(-50%);
+    background: #fff;
+    border: 1px solid #eee;
+    box-shadow: 0 8px 30px rgba(0, 0, 0, 0.1);
+    min-width: 200px;
+    z-index: 100;
+    animation: dropIn 0.2s ease;
+}
+
+@keyframes dropIn {
+    from {
+        opacity: 0;
+        transform: translateX(-50%) translateY(-8px);
+    }
+
+    to {
+        opacity: 1;
+        transform: translateX(-50%) translateY(0);
+    }
+}
+
+.nav-dropdown-item {
+    display: block;
+    padding: 12px 20px;
+    font-size: 13px;
+    color: #333;
+    text-decoration: none;
+    transition: all 0.2s;
+    letter-spacing: 0.3px;
+}
+
+.nav-dropdown-item:hover {
+    background: #f8f6f3;
+    color: #1a1a1a;
+    padding-left: 24px;
+}
+
+.nav-dropdown-divider {
+    height: 1px;
+    background: #eee;
+    margin: 0;
+}
+
+/* Mobile Section Title & Sublinks */
+.mobile-section-title {
+    font-weight: 700 !important;
+    color: #1a1a1a !important;
+    font-size: 12px !important;
+    letter-spacing: 2px !important;
+    border-bottom: none !important;
+    padding-bottom: 5px !important;
+    margin-top: 5px !important;
+}
+
+.mobile-sublink {
+    padding-left: 35px !important;
+    font-size: 13px !important;
+    color: #666 !important;
+    letter-spacing: 0.5px !important;
+}
+
+.mobile-sublink:hover {
+    color: #1a1a1a !important;
+    background: #f8f6f3 !important;
+}
+
+/* --- SEARCH BAR DESKTOP (Overlap Fix) --- */
+.search-container {
+    display: flex;
+    align-items: center;
+    position: relative;
+    /* Removed overflow: hidden so button is clickable but input sits nicely */
+}
+
+.search-trigger {
+    z-index: 2;
+    background: none;
+    border: none;
+    cursor: pointer;
+    display: flex;
+    /* align icon */
+}
+
+.search-input {
+    width: 0;
+    opacity: 0;
+    padding: 0;
+    border: none;
+    /* No border initially */
+    border-bottom: 1px solid transparent;
+    background: transparent;
+    transition: all 0.4s ease;
+    outline: none;
+    font-family: 'Lato', sans-serif;
+    font-size: 14px;
+    color: var(--text-main, #333);
+
+    /* Layout change: Not absolute, but hidden via width */
+    overflow: hidden;
+    margin-right: 0;
+}
+
+.search-container.active .search-input {
+    width: 200px;
+    /* Expands pushing elements to the right? Or absolute overlay? */
+    /* If we want to push: keep layout flow. */
+    opacity: 1;
+    padding: 5px 0;
+    border-bottom-color: var(--text-main, #333);
+    margin-right: 10px;
+    /* Space between input and icon */
+}
+
+/* If user wants it NOT to push elements (because that shifts layout), 
+   we can keep absolute but ensure it has background and high z-index.
+   But user said "overlapping with menu", which implies it looked messy on top.
+   Pushing content (width transition) is cleaner and avoids overlap.
+*/
+
+/* --- HIDE MOBILE ELEMENTS ON DESKTOP --- */
+.mobile-toggle {
+    display: none;
+}
+
+.mobile-right-section {
+    display: none;
+}
+
+.mobile-menu-expansion {
+    display: none;
+}
+
+.mobile-overlay {
+    display: none;
+}
+
+.mobile-search-bar {
+    display: none;
+}
+
+/* =========================================
+   MOBILE RESPONSIVE STYLES (Max Width 900px)
+   ========================================= */
+@media (max-width: 900px) {
+
+    .nav-wrapper {
+        height: 70px;
+    }
+
+    .nav-bar {
+        padding: 0 20px;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        width: 100%;
+    }
+
+    /* Hide Desktop Icons */
+    .desktop-icons {
+        display: none !important;
+    }
+
+    /* 1. Hamburger (Left) */
+    .mobile-toggle {
+        display: block !important;
+        font-size: 22px;
+        cursor: pointer;
+        width: 40px;
+        order: 1;
+    }
+
+    /* 2. Logo (Center) */
+    .brand-logo {
+        order: 2;
+        flex: 1;
+        justify-content: center;
+    }
+
+    .logo-img {
+        height: 40px;
+    }
+
+    /* 3. Mobile Right Section (Search + Cart) */
+    .mobile-right-section {
+        display: flex !important;
+        align-items: center;
+        gap: 15px;
+        /* Space between Search and Cart icons */
+        order: 3;
+        width: auto;
+        /* Allow auto width to fit contents */
+        min-width: 40px;
+        /* Minimum width balance */
+        justify-content: flex-end;
+    }
+
+    .mobile-search-trigger {
+        font-size: 18px;
+        cursor: pointer;
+        color: var(--text-main, #333);
+    }
+
+    .mobile-cart-link {
+        font-size: 16px;
+        color: var(--text-main, #333);
+        text-decoration: none;
+    }
+
+    /* --- MOBILE SEARCH BAR DROPDOWN --- */
+    .mobile-search-bar {
+        display: block;
+        position: absolute;
+        top: 100%;
+        /* Sits just below the header */
+        left: 0;
+        width: 100%;
+        background-color: #ffffff;
+        padding: 15px 20px;
+        box-shadow: 0 4px 6px rgba(0, 0, 0, 0.05);
+        z-index: 999;
+
+        /* Animation properties */
+        opacity: 0;
+        visibility: hidden;
+        transform: translateY(-10px);
+        transition: all 0.3s ease;
+    }
+
+    .mobile-search-bar.open {
+        opacity: 1;
+        visibility: visible;
+        transform: translateY(0);
+    }
+
+    .mobile-search-bar form {
+        display: flex;
+        align-items: center;
+        border: 1px solid #eee;
+        padding: 5px 10px;
+        border-radius: 4px;
+    }
+
+    .mobile-search-bar input {
+        flex: 1;
+        border: none;
+        outline: none;
+        padding: 8px;
+        font-size: 14px;
+        background: transparent;
+    }
+
+    .mobile-search-bar button {
+        background: transparent;
+        border: none;
+        color: #999;
+        cursor: pointer;
+    }
+
+    /* --- SIDEBAR MENU --- */
+    .mobile-menu-expansion {
+        display: flex;
+        flex-direction: column;
+        position: fixed;
+        top: 0;
+        left: 0;
+        height: 100vh;
+        width: 280px;
+        background-color: #ffffff;
+        box-shadow: 2px 0 10px rgba(0, 0, 0, 0.1);
+        z-index: 2000;
+        transform: translateX(-100%);
+        transition: transform 0.3s ease-in-out;
+    }
+
+    .mobile-menu-expansion.open {
+        transform: translateX(0);
+    }
+
+    .mobile-menu-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        padding: 20px;
+        border-bottom: 1px solid #f0f0f0;
+        background-color: #fafafa;
+    }
+
+    .menu-title {
+        font-weight: 700;
+        text-transform: uppercase;
+        font-size: 14px;
+    }
+
+    .mobile-menu-close {
+        font-size: 20px;
+        padding: 5px;
+        cursor: pointer;
+    }
+
+    .mobile-link {
+        padding: 15px 20px;
+        border-bottom: 1px solid #f0f0f0;
+        text-decoration: none;
+        color: #333;
+        font-size: 15px;
+        /* Slightly larger for readability */
+        text-transform: capitalize;
+        /* Normal writing (Capitalize first letter) */
+        letter-spacing: 0.5px;
+        display: block;
+        /* Ensure full width clickable */
+    }
+
+    .mobile-link-btn {
+        text-align: left;
+        background: none;
+        border: none;
+        width: 100%;
+        cursor: pointer;
+        font-family: inherit;
+    }
+
+    /* Overlay */
+    .mobile-overlay {
+        display: block;
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        background-color: rgba(0, 0, 0, 0.5);
+        z-index: 1500;
+        opacity: 0;
+        visibility: hidden;
+        transition: opacity 0.3s ease;
+    }
+
+    .mobile-overlay.open {
+        opacity: 1;
+        visibility: visible;
+    }
+}

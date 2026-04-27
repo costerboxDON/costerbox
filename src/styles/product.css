@@ -1,0 +1,504 @@
+/* src/styles/product.css */
+@import url('https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;500;600&family=Lato:wght@300;400;700&display=swap');
+
+/* ========================================= */
+/* 1. RESET & WRAPPERS                       */
+/* ========================================= */
+* {
+    box-sizing: border-box;
+    -webkit-tap-highlight-color: transparent;
+}
+
+html,
+body {
+    overflow-x: hidden;
+    /* Prevent global scroll */
+    width: 100%;
+}
+
+.pdp-wrapper {
+    max-width: 1400px;
+    margin: 0 auto;
+    padding: 40px 20px;
+    font-family: 'Lato', sans-serif;
+    color: #0f1111;
+    background-color: #fff;
+    min-height: 100vh;
+    width: 100%;
+}
+
+/* ========================================= */
+/* 2. DESKTOP GRID LAYOUT                    */
+/* ========================================= */
+.pdp-layout {
+    display: grid;
+    grid-template-columns: 55% 40%;
+    /* More space for image, standard fashion layout */
+    gap: 5%;
+    align-items: start;
+    width: 100%;
+}
+
+/* ========================================= */
+/* 3. LEFT COLUMN: GALLERY                   */
+/* ========================================= */
+.pdp-gallery-wrapper {
+    display: flex;
+    position: sticky;
+    top: 20px;
+    height: calc(100vh - 40px);
+    min-height: 600px;
+    gap: 20px;
+}
+
+/* Thumbnails (Vertical Strip) */
+.pdp-thumbs-row {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+    width: 70px;
+    min-width: 70px;
+    overflow-y: auto;
+    scrollbar-width: none;
+    order: -1;
+}
+
+.pdp-thumbs-row::-webkit-scrollbar {
+    display: none;
+}
+
+.pdp-thumb-item {
+    width: 70px;
+    height: 90px;
+    border: 1px solid #e0e0e0;
+    border-radius: 4px;
+    cursor: pointer;
+    position: relative;
+    overflow: hidden;
+    transition: border-color 0.2s;
+}
+
+.pdp-thumb-item:hover,
+.pdp-thumb-item.active {
+    border: 2px solid #e77600;
+}
+
+.pdp-thumb-item img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+}
+
+/* Main Image */
+.pdp-main-image-container {
+    flex: 1;
+    position: relative;
+    border: 1px solid #f0f0f0;
+    border-radius: 8px;
+    overflow: hidden;
+    background: #fff;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    height: 100%;
+}
+
+.pdp-main-image {
+    width: 100%;
+    height: 100%;
+    object-fit: contain !important;
+}
+
+.pdp-discount-badge {
+    position: absolute;
+    top: 15px;
+    left: 15px;
+    background: #CC0C39;
+    color: #fff;
+    width: 52px;
+    height: 52px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 12px;
+    font-weight: 700;
+    z-index: 5;
+    line-height: 1.1;
+    text-align: center;
+    box-shadow: 0 2px 8px rgba(204, 12, 57, 0.35);
+}
+
+.pdp-badge {
+    position: absolute;
+    top: 15px;
+    right: 15px;
+    background: #232f3e;
+    color: #fff;
+    padding: 4px 8px;
+    font-size: 11px;
+    font-weight: 700;
+    text-transform: uppercase;
+    z-index: 5;
+}
+
+/* ========================================= */
+/* 4. RIGHT COLUMN: PRODUCT INFO             */
+/* ========================================= */
+.pdp-info-column {
+    width: 100%;
+}
+
+.pdp-vendor {
+    font-size: 13px;
+    color: #007185;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    margin-bottom: 8px;
+    font-weight: 700;
+}
+
+.pdp-title {
+    font-family: 'Playfair Display', serif;
+    font-size: 32px;
+    line-height: 1.2;
+    font-weight: 500;
+    color: #1a1a1a;
+    margin-bottom: 12px;
+    /* Prevent Overflow */
+    overflow-wrap: break-word;
+    word-break: normal;
+}
+
+/* Price */
+.pdp-pricing {
+    display: flex;
+    align-items: baseline;
+    gap: 12px;
+    padding: 15px 0;
+    border-top: 1px solid #eee;
+    border-bottom: 1px solid #eee;
+    margin-bottom: 20px;
+}
+
+.pdp-price {
+    font-size: 28px;
+    font-weight: 500;
+    color: #B12704;
+    /* Amazon Red-ish for price */
+}
+
+.pdp-compare-price {
+    font-size: 14px;
+    text-decoration: line-through;
+    color: #565959;
+}
+
+.pdp-save-tag {
+    color: #CC0C39;
+    font-size: 14px;
+    font-weight: 700;
+}
+
+.pdp-tax-note {
+    font-size: 13px;
+    color: #555;
+    margin-bottom: 25px;
+}
+
+/* Size Selector */
+.pdp-size-section {
+    margin-bottom: 25px;
+}
+
+.pdp-size-header {
+    display: flex;
+    justify-content: space-between;
+    margin-bottom: 10px;
+    font-weight: 700;
+    font-size: 14px;
+}
+
+.pdp-size-options {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 10px;
+}
+
+.pdp-size-btn {
+    padding: 10px 20px;
+    border: 1px solid #ccc;
+    background: #fff;
+    border-radius: 4px;
+    cursor: pointer;
+    font-size: 14px;
+    transition: all 0.2s;
+}
+
+.pdp-size-btn:hover {
+    border-color: #1a1a1a;
+    background: #f7f7f7;
+}
+
+.pdp-size-active {
+    border: 2px solid #e77600;
+    font-weight: 700;
+    background: #fffcf6;
+}
+
+/* Action Buttons */
+.pdp-actions {
+    display: flex;
+    gap: 15px;
+    margin-top: 30px;
+}
+
+.pdp-btn-cart,
+.pdp-btn-buy {
+    flex: 1;
+    height: 45px;
+    border-radius: 25px;
+    border: none;
+    font-size: 14px;
+    font-weight: 600;
+    cursor: pointer;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+}
+
+.pdp-btn-cart {
+    background: #FFD814;
+    border: 1px solid #FCD200;
+}
+
+.pdp-btn-cart:hover {
+    background: #F7CA00;
+}
+
+.pdp-btn-buy {
+    background: #FFA41C;
+    border: 1px solid #FF8F00;
+}
+
+.pdp-btn-buy:hover {
+    background: #FA8900;
+}
+
+.pdp-btn-wishlist {
+    width: 45px;
+    height: 45px;
+    border-radius: 50%;
+    border: 1px solid #ddd;
+    background: #fff;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    flex-shrink: 0;
+}
+
+.pdp-btn-customize-main {
+    width: 100%;
+    padding: 12px;
+    border: 1px solid #1a1a1a;
+    background: transparent;
+    font-weight: 700;
+    margin-top: 15px;
+    cursor: pointer;
+    border-radius: 8px;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    gap: 8px;
+}
+
+/* Description */
+.pdp-description-container {
+    margin-top: 40px;
+    /* Prevent overflow */
+    max-width: 100%;
+}
+
+.pdp-description-text {
+    font-size: 16px;
+    line-height: 1.6;
+    color: #333;
+    overflow-wrap: break-word !important;
+    word-break: normal !important;
+}
+
+.pdp-description-text img {
+    max-width: 100%;
+    height: auto;
+}
+
+/* Trust Badges */
+.pdp-trust {
+    display: flex;
+    gap: 20px;
+    padding: 20px 0;
+    margin-top: 20px;
+    border-top: 1px solid #f0f0f0;
+}
+
+.pdp-trust-item {
+    font-size: 13px;
+    font-weight: 600;
+    color: #555;
+    display: flex;
+    align-items: center;
+    gap: 6px;
+}
+
+/* Accordion */
+.pdp-accordion {
+    margin-top: 30px;
+    border: 1px solid #eee;
+    border-radius: 8px;
+}
+
+.pdp-accordion-trigger {
+    width: 100%;
+    padding: 15px;
+    background: #fff;
+    border: none;
+    border-bottom: 1px solid #eee;
+    display: flex;
+    justify-content: space-between;
+    font-weight: 600;
+    cursor: pointer;
+}
+
+.pdp-accordion-body {
+    padding: 0 15px;
+    max-height: 0;
+    overflow: hidden;
+    transition: max-height 0.3s;
+    background: #fdfdfd;
+}
+
+.pdp-accordion-open .pdp-accordion-body {
+    max-height: 500px;
+    padding-bottom: 15px;
+}
+
+/* ========================================= */
+/* 5. TABLET RESPONSIVE (1024px)             */
+/* ========================================= */
+@media (max-width: 1024px) {
+    .pdp-wrapper {
+        padding: 0 0 100px 0;
+        /* Important: Bottom padding for sticky actions */
+    }
+
+    .pdp-layout {
+        display: block;
+        /* Stack layout */
+    }
+
+    /* Gallery Tablet/Mobile */
+    .pdp-gallery-wrapper {
+        position: relative;
+        height: auto;
+        flex-direction: column;
+        gap: 15px;
+        margin-bottom: 25px;
+    }
+
+    /* Main Image Canvas */
+    .pdp-main-image-container {
+        width: 100%;
+        height: auto;
+        aspect-ratio: 1 / 1.1;
+        /* Slightly taller than square */
+        border: none;
+        border-bottom: 1px solid #eee;
+    }
+
+    /* Thumbs Row Horizontal */
+    .pdp-thumbs-row {
+        flex-direction: row;
+        order: 1;
+        /* Below image */
+        width: 100%;
+        height: 80px;
+        padding: 0 15px;
+        gap: 15px;
+        overflow-x: auto;
+    }
+
+    .pdp-thumb-item {
+        width: 60px;
+        height: 60px;
+        flex-shrink: 0;
+    }
+
+    /* Info Column */
+    .pdp-info-column {
+        padding: 0 20px;
+    }
+
+    .pdp-title {
+        font-size: 24px;
+        margin-top: 10px;
+    }
+
+    /* STICKY ACTIONS FOR MOBILE/TABLET */
+    .pdp-actions {
+        position: fixed;
+        bottom: 0;
+        left: 0;
+        width: 100%;
+        background: #fff;
+        padding: 12px 15px;
+        margin: 0;
+        box-shadow: 0 -4px 10px rgba(0, 0, 0, 0.1);
+        z-index: 9999;
+        /* Highest priority */
+        gap: 10px;
+    }
+
+    .pdp-btn-cart,
+    .pdp-btn-buy {
+        height: 45px;
+        border-radius: 8px;
+        /* Softer rect */
+        font-size: 14px;
+    }
+
+    .pdp-btn-wishlist {
+        display: none;
+        /* Hide wishlist on sticky bar */
+    }
+
+    /* Breadcrumb Cleanup */
+    .pdp-breadcrumb {
+        padding: 10px 15px;
+        border-bottom: 1px solid #eee;
+        background: #fcfcfc;
+        margin-bottom: 0;
+    }
+}
+
+/* MOBILE SPECIFIC OVERRIDES */
+@media (max-width: 768px) {
+    .pdp-modal-overlay {
+        position: fixed;
+        inset: 0;
+        background: rgba(0, 0, 0, 0.5);
+        backdrop-filter: blur(5px);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        z-index: 10001;
+        padding: 10px;
+    }
+
+    .pdp-modal-content {
+        max-height: 85vh;
+        overflow-y: auto;
+        width: 100% !important;
+        margin: 0 !important;
+        border-radius: 12px !important;
+    }
+}

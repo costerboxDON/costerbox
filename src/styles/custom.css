@@ -1,0 +1,262 @@
+/* src/styles/custom.css */
+@import url('https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;500;600&family=Lato:wght@300;400;700&display=swap');
+
+/* --- HOME SECTION --- */
+.home-custom-section {
+    padding: 80px 0;
+    background: #fff;
+}
+
+.custom-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 30px;
+}
+
+.custom-card {
+    position: relative;
+    height: 400px;
+    /* Reduced height for better proportion */
+    overflow: hidden;
+
+
+}
+
+.custom-card-img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    transition: transform 0.6s ease;
+}
+
+.custom-card:hover .custom-card-img {
+    transform: scale(1.05);
+    /* Gentle zoom */
+}
+
+.custom-overlay {
+    position: absolute;
+    inset: 0;
+    background: rgba(0, 0, 0, 0.3);
+    display: flex;
+    flex-direction: column;
+    justify-content: flex-end;
+    /* Align bottom */
+    padding: 40px;
+    color: #fff;
+    transition: background 0.3s;
+}
+
+.custom-card:hover .custom-overlay {
+    background: rgba(0, 0, 0, 0.4);
+}
+
+.custom-subtitle {
+    font-size: 12px;
+    text-transform: uppercase;
+    letter-spacing: 2px;
+    margin-bottom: 10px;
+    opacity: 0.9;
+}
+
+.custom-title {
+    font-family: 'Playfair Display', serif;
+    font-size: 2rem;
+    margin-bottom: 20px;
+    color: #fff;
+    line-height: 1.2;
+}
+
+.custom-btn {
+    display: inline-flex;
+    align-items: center;
+    gap: 10px;
+    padding: 12px 25px;
+    background: #fff;
+    color: #000;
+    font-family: 'Lato', sans-serif;
+    font-weight: 700;
+    text-transform: uppercase;
+    font-size: 12px;
+    border: none;
+    transition: all 0.3s;
+    width: fit-content;
+    text-decoration: none;
+}
+
+.custom-btn:hover {
+    background: #000;
+    color: #fff;
+}
+
+/* --- INNER PAGES (Upcycle & Bespoke) --- */
+.custom-page-wrapper {
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: 40px 20px;
+    font-family: 'Lato', sans-serif;
+}
+
+.cp-header {
+    text-align: center;
+    margin-bottom: 60px;
+    padding-bottom: 40px;
+    border-bottom: 1px solid #eee;
+}
+
+.cp-overline {
+    font-size: 12px;
+    text-transform: uppercase;
+    letter-spacing: 2px;
+    color: #888;
+    display: block;
+    margin-bottom: 15px;
+}
+
+.cp-title {
+    font-family: 'Playfair Display', serif;
+    font-size: 3rem;
+    color: #1a1a1a;
+    margin-bottom: 20px;
+}
+
+.cp-lead {
+    font-size: 1.2rem;
+    color: #555;
+    max-width: 700px;
+    margin: 0 auto;
+    line-height: 1.6;
+}
+
+/* PROCESS STEPS */
+.cp-process {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 40px;
+    margin-bottom: 60px;
+}
+
+.cp-step {
+    background: #f9f9f9;
+    padding: 40px 30px;
+    text-align: center;
+    transition: transform 0.3s;
+}
+
+.cp-step:hover {
+    transform: translateY(-5px);
+}
+
+.cp-step-icon {
+    font-size: 2rem;
+    color: #1a1a1a;
+    margin-bottom: 20px;
+}
+
+.cp-step-number {
+    display: inline-block;
+    width: 30px;
+    height: 30px;
+    background: #000;
+    color: #fff;
+    border-radius: 50%;
+    line-height: 30px;
+    font-size: 14px;
+    font-weight: 700;
+    margin-bottom: 15px;
+}
+
+.cp-step-title {
+    font-family: 'Playfair Display', serif;
+    font-size: 1.3rem;
+    margin-bottom: 10px;
+}
+
+.cp-step-desc {
+    font-size: 0.95rem;
+    color: #666;
+    line-height: 1.5;
+}
+
+/* CTA SECTION */
+.cp-action {
+    text-align: center;
+    background: #1a1a1a;
+    color: #fff;
+    padding: 60px 20px;
+    margin-top: 40px;
+    border-radius: 4px;
+    /* Slight micro-radius */
+}
+
+.cp-action h2 {
+    font-family: 'Playfair Display', serif;
+    font-size: 2rem;
+    margin-bottom: 20px;
+    color: #fff;
+}
+
+.cp-action p {
+    color: #ccc;
+    max-width: 600px;
+    margin: 0 auto 30px auto;
+}
+
+.cp-start-btn {
+    padding: 15px 40px;
+    background: #fff;
+    color: #000;
+    font-weight: 700;
+    text-transform: uppercase;
+    font-size: 14px;
+    border: none;
+    cursor: pointer;
+    transition: all 0.3s;
+    display: inline-flex;
+    align-items: center;
+    gap: 10px;
+}
+
+.cp-start-btn:hover {
+    transform: scale(1.05);
+    box-shadow: 0 5px 15px rgba(255, 255, 255, 0.2);
+}
+
+
+/* MODAL FOR CHAT */
+.cp-modal-overlay {
+    position: fixed;
+    inset: 0;
+    background: rgba(0, 0, 0, 0.6);
+    backdrop-filter: blur(5px);
+    z-index: 2000;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    padding: 20px;
+}
+
+/* RESPONSIVE */
+@media (max-width: 768px) {
+    .custom-grid {
+        grid-template-columns: 1fr;
+        gap: 20px;
+    }
+
+    .custom-card {
+        height: 300px;
+    }
+
+    .custom-title {
+        font-size: 1.8rem;
+    }
+
+    .cp-process {
+        grid-template-columns: 1fr;
+        gap: 20px;
+    }
+
+    .cp-title {
+        font-size: 2rem;
+    }
+}

@@ -1,0 +1,81 @@
+/* src/styles/globals.css */
+:root {
+  /* Primary: Specific Logo Background Color */
+  --brand-beige: #cbb79a;
+
+  /* Backgrounds */
+  --brand-cream: #F7F5F0;
+  --brand-white: #FFFFFF;
+
+  /* Text */
+  --text-main: #1C1C1C;
+  --text-muted: #555555;
+
+  /* Spacing Standard */
+  --spacing-unit: 80px;
+}
+
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+/* Global text wrapping — safe defaults */
+p,
+h1,
+h2,
+h3,
+h4,
+h5,
+h6,
+span,
+a,
+li,
+td,
+th,
+label {
+  overflow-wrap: break-word;
+  word-break: normal;
+}
+
+body {
+  font-family: 'Lato', sans-serif;
+  background-color: var(--brand-cream);
+  color: var(--text-main);
+  overflow-x: hidden;
+  line-height: 1.8;
+}
+
+h1,
+h2,
+h3,
+h4 {
+  font-family: 'Playfair Display', serif;
+  color: var(--text-main);
+  font-weight: 400;
+}
+
+a {
+  text-decoration: none;
+  color: inherit;
+  transition: 0.4s ease;
+}
+
+img {
+  max-width: 100%;
+  display: block;
+}
+
+/* Utilities */
+.container {
+  max-width: 1300px;
+  margin: 0 auto;
+  padding: 0 40px;
+}
+
+@media (max-width: 768px) {
+  .container {
+    padding: 0 20px;
+  }
+}

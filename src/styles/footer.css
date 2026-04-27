@@ -1,0 +1,236 @@
+/* src/styles/footer.css */
+
+footer {
+  background-color: #000;
+  color: #fff;
+  padding: 50px 20px 20px;
+  font-family: 'Lato', sans-serif;
+  letter-spacing: 0.5px;
+}
+
+.footer-container {
+  max-width: 1320px;
+  margin: 0 auto;
+}
+
+/* TOP COLUMNS */
+.footer-top {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 30px;
+  margin-bottom: 50px;
+  border-bottom: 1px solid #333;
+  padding-bottom: 30px;
+}
+
+.footer-col h4 {
+  color: #ff5722;
+  font-size: 16px;
+  text-transform: uppercase;
+  margin-bottom: 20px;
+  font-weight: 700;
+}
+
+.footer-col ul {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+}
+
+.footer-col ul li {
+  margin-bottom: 12px;
+}
+
+.footer-col ul li a {
+  color: #ddd;
+  text-decoration: none;
+  font-size: 14px;
+  transition: color 0.2s;
+}
+
+.footer-col ul li a:hover {
+  color: #fff;
+}
+
+/* Contact Column — Fixed text wrapping & icon alignment */
+.contact-col p {
+  color: #ddd;
+  font-size: 14px;
+  margin-bottom: 12px;
+  display: flex;
+  align-items: flex-start;
+  word-wrap: break-word;
+  overflow-wrap: break-word;
+}
+
+.contact-col p span {
+  word-wrap: break-word;
+  overflow-wrap: break-word;
+}
+
+.contact-col a {
+  color: #ddd;
+  text-decoration: none;
+}
+
+/* Footer Contact Icon — fixed mobile spacing */
+.footer-contact-icon {
+  margin-right: 8px;
+  display: inline-block;
+  min-width: 16px;
+  flex-shrink: 0;
+  margin-top: 3px;
+}
+
+/* MIDDLE ROW */
+.footer-middle {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 40px;
+  flex-wrap: wrap;
+  gap: 30px;
+}
+
+.footer-payment h4,
+.footer-social h4 {
+  color: #fff;
+  font-size: 18px;
+  margin-bottom: 15px;
+  font-weight: 700;
+}
+
+.payment-icons {
+  display: flex;
+  gap: 10px;
+}
+
+.payment-icons img {
+  height: 30px;
+  background: white;
+  border-radius: 4px;
+  padding: 2px;
+}
+
+/* Social Icons — with improved contrast for X/Twitter */
+.social-icons {
+  display: flex;
+  gap: 12px;
+}
+
+.social-icons a {
+  color: #fff;
+  background: #333;
+  width: 42px;
+  height: 42px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 8px;
+  transition: background 0.3s, transform 0.2s;
+  font-size: 16px;
+}
+
+.social-icons a:hover {
+  background: #ff5722;
+  transform: translateY(-2px);
+}
+
+/* Twitter/X icon fix — ensure visibility */
+.social-icons a.social-twitter {
+  background: #1a1a1a;
+}
+
+.social-icons a.social-twitter svg {
+  display: block;
+}
+
+.social-icons a.social-twitter:hover {
+  background: #000;
+}
+
+/* INSTAGRAM EMBED SECTION */
+.footer-instagram {
+  border-top: 1px solid #333;
+  padding-top: 30px;
+  margin-bottom: 30px;
+  text-align: center;
+}
+
+.footer-instagram h4 {
+  color: #fff;
+  font-size: 18px;
+  margin-bottom: 20px;
+  font-weight: 700;
+}
+
+.footer-ig-iframe-wrap {
+  max-width: 540px;
+  margin: 0 auto;
+  border-radius: 12px;
+  overflow: hidden;
+  background: #111;
+  border: 1px solid #333;
+}
+
+.footer-ig-iframe-wrap iframe {
+  width: 100%;
+  min-height: 480px;
+  border: none;
+}
+
+/* BOTTOM */
+.footer-bottom {
+  text-align: center;
+  font-size: 12px;
+  color: #666;
+  border-top: 1px solid #222;
+  padding-top: 20px;
+}
+
+/* RESPONSIVE */
+@media (max-width: 900px) {
+  .footer-top {
+    grid-template-columns: repeat(2, 1fr);
+  }
+}
+
+@media (max-width: 600px) {
+  .footer-top {
+    grid-template-columns: 1fr;
+    text-align: center;
+  }
+
+  .contact-col p {
+    justify-content: center;
+    text-align: left;
+  }
+
+  /* Fix mobile MapPin icon margin */
+  .footer-contact-icon {
+    margin-right: 6px;
+    margin-top: 2px;
+  }
+
+  .footer-middle {
+    flex-direction: column;
+    text-align: center;
+  }
+
+  .footer-payment,
+  .footer-social {
+    width: 100%;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+  }
+
+  /* Instagram iframe mobile responsive */
+  .footer-ig-iframe-wrap {
+    max-width: 100%;
+  }
+
+  .footer-ig-iframe-wrap iframe {
+    min-height: 380px;
+  }
+}

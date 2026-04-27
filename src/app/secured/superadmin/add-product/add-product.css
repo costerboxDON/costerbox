@@ -1,0 +1,532 @@
+/* src/app/secured/superadmin/add-product/add-product.css */
+
+/* --- GLOBAL SAFETY RESETS --- */
+* {
+  box-sizing: border-box;
+}
+
+/* Force images to never overflow their container */
+img {
+  max-width: 100%;
+  height: auto;
+  display: block;
+}
+
+/* Make all inputs look good by default */
+input, select, textarea {
+  width: 100%;
+  padding: 10px 12px;
+  font-size: 14px;
+  border: 1px solid #dcdcdc;
+  border-radius: 6px;
+  background: #fff;
+  font-family: inherit;
+  margin-bottom: 5px; /* Safety spacing */
+}
+
+input:focus, select:focus, textarea:focus {
+  outline: none;
+  border-color: #1a1a1a;
+  box-shadow: 0 0 0 2px rgba(0,0,0,0.1);
+}
+
+/* --- LAYOUT --- */
+.page-container {
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 20px;
+  padding-bottom: 100px; /* Space for footer */
+  background-color: #f6f6f7; /* Shopify-like background */
+  min-height: 100vh;
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+  color: #202223;
+}
+
+.header-actions {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 25px;
+}
+
+.page-title {
+  font-size: 24px;
+  font-weight: 700;
+  margin: 0;
+}
+
+/* Two Column Grid */
+.main-layout {
+  display: grid;
+  grid-template-columns: 2fr 1fr; /* Left is 2x wider than Right */
+  gap: 20px;
+  align-items: start;
+}
+
+/* Mobile: Stack them */
+@media (max-width: 850px) {
+  .main-layout { grid-template-columns: 1fr; }
+}
+
+/* --- CARDS --- */
+.card {
+  background: #ffffff;
+  border-radius: 8px;
+  box-shadow: 0 2px 5px rgba(0,0,0,0.05);
+  padding: 20px;
+  margin-bottom: 20px;
+  border: 1px solid #e1e3e5;
+}
+
+.card h3 {
+  font-size: 16px;
+  font-weight: 600;
+  margin-top: 0;
+  margin-bottom: 15px;
+  color: #1a1a1a;
+}
+
+/* --- FORM ELEMENTS --- */
+.form-group { margin-bottom: 20px; }
+.form-row { display: flex; gap: 20px; margin-bottom: 15px; }
+.form-col { flex: 1; }
+
+label {
+  display: block;
+  font-size: 13px;
+  margin-bottom: 8px;
+  color: #444;
+  font-weight: 500;
+}
+
+.helper-text {
+  font-size: 12px;
+  color: #6d7175;
+  margin-top: 5px;
+}
+
+
+/* ============================================= */
+/* ===  REACT QUILL RICH TEXT EDITOR STYLES  === */
+/* ============================================= */
+.quill-wrapper {
+  border: 1px solid #dcdcdc;
+  border-radius: 8px;
+  overflow: hidden;
+  transition: border-color 0.2s, box-shadow 0.2s;
+}
+
+.quill-wrapper:focus-within {
+  border-color: #1a1a1a;
+  box-shadow: 0 0 0 2px rgba(0, 0, 0, 0.08);
+}
+
+.quill-wrapper .ql-toolbar.ql-snow {
+  border: none !important;
+  border-bottom: 1px solid #e8e8e8 !important;
+  background: #f9fafb;
+  padding: 8px 12px !important;
+}
+
+.quill-wrapper .ql-container.ql-snow {
+  border: none !important;
+  font-size: 14px;
+  min-height: 200px;
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+}
+
+.quill-wrapper .ql-editor {
+  min-height: 200px;
+  padding: 14px 16px;
+  color: #202223;
+  line-height: 1.7;
+}
+
+.quill-wrapper .ql-editor.ql-blank::before {
+  color: #999;
+  font-style: normal;
+}
+
+.quill-wrapper .ql-snow .ql-stroke {
+  stroke: #555;
+}
+
+.quill-wrapper .ql-snow .ql-fill {
+  fill: #555;
+}
+
+.quill-wrapper .ql-snow button:hover .ql-stroke,
+.quill-wrapper .ql-snow .ql-picker-label:hover .ql-stroke {
+  stroke: #1a1a1a;
+}
+
+.quill-wrapper .ql-snow button.ql-active .ql-stroke {
+  stroke: #1a1a1a;
+}
+
+.quill-wrapper .ql-snow button.ql-active {
+  background: #eee;
+  border-radius: 3px;
+}
+
+
+/* ======================================== */
+/* ===  MEDIA UPLOAD + DRAG & DROP      === */
+/* ======================================== */
+.media-hint {
+  font-size: 12px;
+  color: #888;
+  font-weight: 400;
+  margin-left: 8px;
+}
+
+.media-dropzone {
+  border: 2px dashed #d0d5dd;
+  border-radius: 10px;
+  padding: 40px 20px;
+  text-align: center;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  background: linear-gradient(135deg, #fafbfc, #f0f2f5);
+  position: relative;
+}
+
+.media-dropzone:hover {
+  border-color: #888;
+  background: linear-gradient(135deg, #f0f2f5, #e8eaef);
+}
+
+.dropzone-icon {
+  font-size: 36px;
+  margin-bottom: 8px;
+}
+
+.dropzone-link {
+  color: #0066cc;
+  text-decoration: underline;
+  font-size: 13px;
+  font-weight: 500;
+}
+
+.media-divider {
+  margin: 20px 0 10px 0;
+  font-size: 12px;
+  font-weight: 600;
+  color: #888;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  padding-bottom: 6px;
+  border-bottom: 1px dashed #e0e0e0;
+}
+
+.media-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(120px, 1fr));
+  gap: 12px;
+  margin-top: 16px;
+}
+
+.media-item {
+  position: relative;
+  width: 100%;
+  aspect-ratio: 1;
+  border-radius: 8px;
+  overflow: hidden;
+  border: 2px solid #e1e3e5;
+  background: #fff;
+  cursor: grab;
+  transition: transform 0.2s ease, box-shadow 0.2s ease, opacity 0.2s ease, border-color 0.2s ease;
+  user-select: none;
+}
+
+.media-item:active {
+  cursor: grabbing;
+}
+
+/* Crucial Image Fixes */
+.media-item img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  pointer-events: none;
+}
+
+/* --- Drag States --- */
+.media-item.dragging {
+  opacity: 0.35;
+  transform: scale(0.92);
+}
+
+.media-item.drag-over {
+  border-color: #1a1a1a;
+  transform: scale(1.05);
+  box-shadow: 0 6px 20px rgba(0, 0, 0, 0.15);
+}
+
+/* --- Featured Image --- */
+.media-item.featured {
+  border-color: #00c853;
+  box-shadow: 0 0 0 2px rgba(0, 200, 83, 0.2);
+}
+
+.featured-badge {
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  background: #00c853;
+  color: #fff;
+  font-size: 10px;
+  text-align: center;
+  padding: 3px;
+  font-weight: 700;
+  letter-spacing: 0.5px;
+}
+
+/* --- New Upload styling --- */
+.media-item.new-upload {
+  border-style: dashed;
+  border-color: #b0b8c4;
+}
+
+.media-item.new-upload img {
+  opacity: 0.7;
+}
+
+/* --- Drag Handle --- */
+.drag-handle {
+  position: absolute;
+  top: 4px;
+  left: 4px;
+  background: rgba(0, 0, 0, 0.5);
+  color: #fff;
+  border-radius: 4px;
+  width: 22px;
+  height: 22px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 10px;
+  z-index: 3;
+  pointer-events: none;
+  opacity: 0;
+  transition: opacity 0.2s;
+}
+
+.media-item:hover .drag-handle {
+  opacity: 1;
+}
+
+/* --- Order Number --- */
+.media-order {
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  background: rgba(0, 0, 0, 0.55);
+  color: #fff;
+  font-size: 10px;
+  padding: 2px 7px;
+  border-top-right-radius: 6px;
+  font-weight: 600;
+  z-index: 2;
+}
+
+.media-item.featured .media-order {
+  display: none;
+}
+
+.remove-media {
+  position: absolute; top: 5px; right: 5px;
+  background: rgba(255, 255, 255, 0.9);
+  color: #d32f2f;
+  border: 1px solid #ddd;
+  border-radius: 50%;
+  width: 24px; height: 24px;
+  cursor: pointer;
+  display: flex; align-items: center; justify-content: center;
+  font-weight: bold;
+  z-index: 4;
+  opacity: 0;
+  transition: opacity 0.15s, background 0.15s;
+}
+
+.media-item:hover .remove-media {
+  opacity: 1;
+}
+
+.remove-media:hover {
+  background: #fee2e2;
+  color: #b91c1c;
+}
+
+
+/* ==================================== */
+/* ===  SEO PREVIEW & DYNAMIC SEO   === */
+/* ==================================== */
+.seo-card h3 {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.seo-preview {
+  background: #fff;
+  border: 1px solid #e8e8e8;
+  border-radius: 10px;
+  padding: 18px 20px;
+  margin-bottom: 22px;
+  box-shadow: 0 1px 3px rgba(0,0,0,0.04);
+}
+
+.seo-preview-label {
+  font-size: 11px;
+  text-transform: uppercase;
+  font-weight: 700;
+  color: #999;
+  letter-spacing: 0.5px;
+  margin-bottom: 10px;
+}
+
+.seo-url {
+  font-size: 13px;
+  color: #006621;
+  margin-bottom: 3px;
+  word-break: break-all;
+  line-height: 1.4;
+}
+
+.seo-title-preview {
+  font-size: 18px;
+  color: #1a0dab;
+  margin-bottom: 4px;
+  font-weight: 400;
+  line-height: 1.3;
+  cursor: pointer;
+  text-decoration: none;
+}
+
+.seo-title-preview:hover {
+  text-decoration: underline;
+}
+
+.seo-desc-preview {
+  font-size: 13px;
+  color: #545454;
+  line-height: 1.5;
+}
+
+/* Auto-generated badge */
+.seo-auto-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 3px;
+  font-size: 10px;
+  color: #0066cc;
+  background: rgba(0, 102, 204, 0.08);
+  padding: 2px 8px;
+  border-radius: 20px;
+  font-weight: 600;
+  margin-left: 8px;
+  vertical-align: middle;
+}
+
+/* Character counter */
+.seo-counter {
+  font-size: 11px;
+  color: #999;
+  text-align: right;
+  margin-top: 4px;
+}
+
+.seo-counter.warning {
+  color: #e67e22;
+}
+
+.seo-counter.danger {
+  color: #e74c3c;
+}
+
+.seo-reset {
+  margin-left: 10px;
+  color: #0066cc;
+  cursor: pointer;
+  text-decoration: underline;
+  font-weight: 500;
+}
+
+.seo-reset:hover {
+  color: #004499;
+}
+
+.seo-textarea {
+  min-height: 80px;
+  resize: vertical;
+}
+
+/* URL Handle Input */
+.handle-input-wrapper {
+  display: flex;
+  align-items: stretch;
+}
+
+.handle-prefix {
+  padding: 10px 12px;
+  background: #f3f4f6;
+  border: 1px solid #dcdcdc;
+  border-right: none;
+  border-radius: 6px 0 0 6px;
+  font-size: 13px;
+  color: #888;
+  white-space: nowrap;
+  display: flex;
+  align-items: center;
+}
+
+.handle-input {
+  border-radius: 0 6px 6px 0 !important;
+}
+
+
+/* --- SIDEBAR --- */
+.status-badge {
+  display: inline-block;
+  padding: 4px 10px;
+  border-radius: 12px;
+  font-size: 12px;
+  font-weight: 600;
+  margin-top: 10px;
+}
+.status-active { background: #c8e6c9; color: #1b5e20; }
+.status-draft { background: #ffccbc; color: #bf360c; }
+
+/* --- SAVE FOOTER --- */
+.save-bar {
+  position: fixed;
+  bottom: 0; left: 0; right: 0;
+  background: #1a1a1a;
+  padding: 15px 30px;
+  display: flex;
+  justify-content: flex-end;
+  align-items: center;
+  gap: 15px;
+  z-index: 999;
+  border-top: 1px solid #333;
+}
+
+.btn-primary {
+  background: #fff;
+  color: #000;
+  border: none;
+  padding: 10px 30px;
+  border-radius: 6px;
+  font-weight: 700;
+  cursor: pointer;
+}
+.btn-secondary {
+  background: transparent;
+  color: #ccc;
+  border: 1px solid #555;
+  padding: 10px 20px;
+  border-radius: 6px;
+  cursor: pointer;
+}
