@@ -179,7 +179,19 @@ export default function InventoryPage() {
                 <td style={td}><input type="checkbox" checked={selectedIds.includes(p.id)} onChange={() => toggleSelect(p.id)} /></td>
                 <td style={td}>
                   <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
-                    <img src={p.featuredImage || 'https://via.placeholder.com/50'} style={pImg} alt="" />
+                    {(() => {
+                      const imgSrc = p.featuredImage || (Array.isArray(p.media) && p.media.length > 0 ? p.media[0] : '');
+                      return imgSrc ? (
+                        <img
+                          src={imgSrc}
+                          style={pImg}
+                          alt={p.title}
+                          onError={e => { e.target.style.display = 'none'; e.target.nextSibling && (e.target.nextSibling.style.display = 'flex'); }}
+                        />
+                      ) : (
+                        <div style={{ ...pImg, background: '#f1f5f9', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '20px' }}>🛍️</div>
+                      );
+                    })()}
                     <span style={{ fontWeight: '600', color: '#1e293b' }}>{p.title}</span>
                   </div>
                 </td>

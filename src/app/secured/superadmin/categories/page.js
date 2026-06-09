@@ -264,9 +264,14 @@ export default function CategoriesPage() {
                                             onChange={() => toggleSelect(cat.id)}
                                             style={styles.checkbox}
                                         />
-                                        <div style={styles.imageBox}>
+                                        <div style={styles.imageBox} className="cat-img-box">
                                             {cat.imageUrl ? (
-                                                <img src={cat.imageUrl} style={styles.previewImg} alt="" />
+                                                <img
+                                                    src={cat.imageUrl}
+                                                    style={styles.previewImg}
+                                                    alt={cat.name}
+                                                    onError={e => { e.target.style.display = 'none'; }}
+                                                />
                                             ) : (
                                                 <ImageIcon size={20} color="#ccc" />
                                             )}
@@ -277,7 +282,7 @@ export default function CategoriesPage() {
                                                 style={{ display: 'none' }}
                                                 onChange={(e) => handleImageUpload(cat.id, e.target.files[0])}
                                             />
-                                            <label htmlFor={`img-${cat.id}`} style={styles.imageOverlay}>
+                                            <label htmlFor={`img-${cat.id}`} className="cat-img-overlay">
                                                 {uploadingId === cat.id ? <Loader2 className="spinner" size={16} /> : <Edit2 size={12} />}
                                             </label>
                                         </div>
@@ -318,9 +323,24 @@ export default function CategoriesPage() {
                     )}
                 </div>
             </div>
-            <style jsx>{`
+            <style>{`
                 .spinner { animation: spin 1s linear infinite; }
                 @keyframes spin { from { transform: rotate(0deg); } to { transform: rotate(360deg); } }
+                .cat-img-box { position: relative; }
+                .cat-img-overlay {
+                    position: absolute;
+                    bottom: 0; right: 0; left: 0; top: 0;
+                    background: rgba(0,0,0,0.55);
+                    color: #fff;
+                    display: flex;
+                    align-items: center;
+                    justify-content: center;
+                    opacity: 0;
+                    transition: opacity 0.2s;
+                    cursor: pointer;
+                    border-radius: 8px;
+                }
+                .cat-img-box:hover .cat-img-overlay { opacity: 1; }
             `}</style>
         </div>
     );
@@ -349,7 +369,7 @@ const styles = {
     previewImg: { width: '100%', height: '100%', objectFit: 'cover' },
     searchBox: { display: 'flex', alignItems: 'center', background: '#f5f5f5', padding: '6px 12px', borderRadius: '8px', border: '1px solid #ddd', width: '200px' },
     searchInput: { border: 'none', background: 'transparent', outline: 'none', fontSize: '14px', marginLeft: '8px', width: '100%' },
-    imageOverlay: { position: 'absolute', bottom: 0, right: 0, left: 0, background: 'rgba(0,0,0,0.5)', color: '#fff', height: '100%', display: 'flex', alignItems: 'center', justifyContent: 'center', opacity: 0, transition: 'opacity 0.2s', cursor: 'pointer' },
+    imageOverlay: { display: 'none' }, // Replaced by .cat-img-overlay CSS class for hover support
     cardHover: { '&:hover .imageOverlay': { opacity: 1 } }, // Note: CSS-in-JS pseudo-classes don't work like this in inline styles
     editRow: { display: 'flex', gap: '8px', alignItems: 'center' },
     editInput: { padding: '6px 10px', borderRadius: '4px', border: '1px solid #ddd', fontSize: '14px' },
@@ -360,7 +380,3 @@ const styles = {
     deleteBtn: { background: 'none', border: 'none', color: '#ef4444', cursor: 'pointer', padding: '8px' }
 };
 
-// Add hover styles manually via class or extra logic
-// (Using style inject or just making overlay visible on hover is tricky with standard React inline styles)
-// Let's add the overlay visibility rule directly
-styles.imageBox = { ...styles.imageBox, cursor: 'pointer' };

@@ -148,7 +148,14 @@ export default function AdminDashboard() {
                                         <ShoppingBag size={18} color="#6b7280" />
                                     </div>
                                     <div>
-                                        <div style={{ fontWeight: '600', fontSize: '14px' }}>{order.product?.name || 'Unknown Item'}</div>
+                                        <div style={{ fontWeight: '600', fontSize: '14px' }}>
+                                            {(() => {
+                                                const firstItem = Array.isArray(order.items) && order.items.length > 0 ? order.items[0] : null;
+                                                return firstItem
+                                                    ? (firstItem.name || firstItem.title || 'Product')
+                                                    : (order.product?.name || order.product?.title || 'Unknown Item');
+                                            })()}
+                                        </div>
                                         <div style={{ fontSize: '12px', color: '#9ca3af' }}>
                                             {order.shipping?.firstName} • {new Date(order.createdAt?.seconds * 1000).toLocaleDateString()}
                                         </div>

@@ -256,9 +256,17 @@ function CheckoutContent() {
                 return;
             }
 
-            // 1. Create Razorpay Order
+            // 1. Guard: Block if amount is 0 or invalid
+            if (!totalPayable || totalPayable <= 0) {
+                alert("Cannot process payment: order total is ₹0. Please check your cart or contact support.");
+                setProcessing(false);
+                return;
+            }
+
+            // 2. Create Razorpay Order on server
             const res = await fetch("/api/razorpay", {
                 method: "POST",
+                headers: { "Content-Type": "application/json" },
                 body: JSON.stringify({ amount: totalPayable }),
             });
             const orderData = await res.json();
@@ -274,9 +282,33 @@ function CheckoutContent() {
                 description: `Payment for ${itemsToCheckout.length} Item(s)`,
                 order_id: orderData.id,
                 handler: async function (response) {
-                    console.log("Payment Success. Creating Order...", response);
+                    console.log("Payment Success callback. Verifying...", response);
 
-                    // ... inside handlePayment ...
+                    // ── STEP 1: Server-side signature verification ──────────────
+                    try {
+                        const verifyRes = await fetch('/api/razorpay/verify', {
+                            method: 'POST',
+                            headers: { 'Content-Type': 'application/json' },
+                            body: JSON.stringify({
+                                razorpay_order_id: response.razorpay_order_id,
+                                razorpay_payment_id: response.razorpay_payment_id,
+                                razorpay_signature: response.razorpay_signature,
+                            }),
+                        });
+                        const verifyData = await verifyRes.json();
+                        if (!verifyData.success) {
+                            alert('Payment verification failed. Your payment may not have been captured. Please contact support with your payment ID: ' + response.razorpay_payment_id);
+                            setProcessing(false);
+                            return;
+                        }
+                    } catch (verifyErr) {
+                        console.error('Signature verification error:', verifyErr);
+                        alert('Could not verify payment. Please contact support.');
+                        setProcessing(false);
+                        return;
+                    }
+
+                    // ── STEP 2: Save order to Firestore (only after verified) ──
                     try {
                         const safePayload = {
                             userId: user?.uid || "guest",
@@ -288,7 +320,7 @@ function CheckoutContent() {
                                 return {
                                     id: item.id || "unknown_item",
                                     name: item.name || item.title || "Unnamed",
-                                    paidPrice: p, // Amount paid now (could be 70% or 100%)
+                                    paidPrice: p,
                                     quantity: item.quantity,
                                     selectedSize: item.selectedSize || "",
                                     image: item.featuredImage || item.media?.[0] || "/placeholder.jpg",
@@ -302,28 +334,30 @@ function CheckoutContent() {
                             shipping: { ...formData },
 
                             payment: {
-                                razorpayPaymentId: response.razorpay_payment_id || "demo_id",
-                                razorpayOrderId: response.razorpay_order_id || "demo_order_id",
+                                razorpayPaymentId: response.razorpay_payment_id,
+                                razorpayOrderId: response.razorpay_order_id,
+                                razorpaySignature: response.razorpay_signature,
                                 paidAmount: totalPayable,
                                 pendingAmount: totalPending,
                                 totalAmount: totalRaw,
-                                type: totalPending > 0 ? "PARTIAL_ADVANCE" : "FULL_PAYMENT"
+                                type: totalPending > 0 ? "PARTIAL_ADVANCE" : "FULL_PAYMENT",
+                                verified: true,
                             },
 
                             orderId: `ORD-${Date.now()}-${Math.floor(Math.random() * 1000)}`,
                             status: hasCustomItems ? "pending_artisan_acceptance" : "paid",
-                            isCustomOrder: hasCustomItems, // Flag if *any* custom exists
+                            isCustomOrder: hasCustomItems,
                             createdAt: serverTimestamp()
                         };
 
                         const docRef = await addDoc(collection(db, "orders"), safePayload);
 
-                        // 3. Clear Cart ONLY if checking out from Cart
+                        // Clear Cart ONLY if checking out from Cart
                         if (!productId) {
                             clearCart();
                         }
 
-                        // 4. Auto-Ship (Only if not custom and fully paid)
+                        // Auto-Ship (Only if not custom and fully paid)
                         if (!hasCustomItems && totalPending === 0) {
                             fetch('/api/shiprocket/create-order', {
                                 method: 'POST',
@@ -332,8 +366,7 @@ function CheckoutContent() {
                             }).catch(console.error);
                         }
 
-                        // === GENERATE INVOICE ===
-                        // Generate the bill immediately for the user
+                        // Generate Invoice
                         try {
                             const utils = await import("../../utils/generateInvoice");
                             utils.generateInvoicePDF({ ...safePayload, createdAt: { seconds: Date.now() / 1000 } });
@@ -347,9 +380,8 @@ function CheckoutContent() {
 
                     } catch (err) {
                         console.error("Error saving order:", err);
-                        alert(`Payment successful but order save failed: ${err.message}. Please contact support with your payment confirmation.`);
+                        alert(`Payment verified but order save failed: ${err.message}. Please contact support with your Payment ID: ${response.razorpay_payment_id}`);
                     }
-                    // ...
                 },
                 prefill: {
                     name: `${formData.firstName} ${formData.lastName}`,
