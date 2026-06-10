@@ -78,7 +78,7 @@ export default function HomePage() {
   // Get product image
   const getProductImage = (product, index = 0) => {
     if (index === 0) {
-      return product.featuredImage || (product.media && product.media[0]) || 'https://via.placeholder.com/400x600?text=No+Image';
+      return product.featuredImage || (product.media && product.media[0]) || '/placeholder.jpg';
     }
     // Second image for hover
     if (product.media && product.media.length > 1) return product.media[1];
@@ -260,7 +260,7 @@ export default function HomePage() {
     });
 
     if (product) return product.featuredImage || product.media[0];
-    return 'https://via.placeholder.com/400x600?text=' + encodeURIComponent(catName);
+    return '/placeholder.jpg' + encodeURIComponent(catName);
   };
 
   const getCategoryCount = (catName) => {

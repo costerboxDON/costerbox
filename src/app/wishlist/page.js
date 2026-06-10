@@ -78,7 +78,7 @@ export default function WishlistPage() {
                                         finalImage = product.media[0];
                                     }
                                     if (!finalImage) {
-                                        finalImage = 'https://via.placeholder.com/400x500?text=No+Image';
+                                        finalImage = '/placeholder.jpg';
                                     }
                                     return (
                                         <img

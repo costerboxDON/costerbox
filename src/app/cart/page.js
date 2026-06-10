@@ -50,7 +50,7 @@ export default function CartPage() {
                 {/* ITEMS LIST */}
                 <div className="cart-items">
                     {cartItems.map((item, index) => {
-                        const mainImg = item.featuredImage || (item.media && item.media[0]) || 'https://via.placeholder.com/100';
+                        const mainImg = item.featuredImage || (item.media && item.media[0]) || '/placeholder.jpg';
                         const itemTotal = Number(item.price) * item.quantity;
 
                         return (

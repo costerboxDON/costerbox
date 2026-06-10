@@ -68,7 +68,7 @@ export default function ProductDetailsPage() {
                     // Set Main Image
                     if (data.featuredImage) setMainImage(data.featuredImage);
                     else if (data.media && data.media.length > 0) setMainImage(data.media[0]);
-                    else setMainImage('https://via.placeholder.com/800x1000?text=No+Image');
+                    else setMainImage('/placeholder.jpg');
 
                     // Auto-select first size if available
                     if (data.sizes && data.sizes.length > 0) {
@@ -227,7 +227,7 @@ export default function ProductDetailsPage() {
         ? product.media
         : (product.featuredImage ? [product.featuredImage] : []);
 
-    if (mediaList.length === 0) mediaList.push('https://via.placeholder.com/800x1000?text=No+Image');
+    if (mediaList.length === 0) mediaList.push('/placeholder.jpg');
 
     // Build accordion sections
     const accordionSections = [];
