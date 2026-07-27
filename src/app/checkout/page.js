@@ -216,6 +216,7 @@ function CheckoutContent() {
                         };
                     }),
                     shipping: { ...formData },
+                    paymentMethod: "COD",
                     payment: {
                         razorpayPaymentId: "COD",
                         razorpayOrderId: "COD",
@@ -332,7 +333,7 @@ function CheckoutContent() {
                             }),
 
                             shipping: { ...formData },
-
+                            paymentMethod: "RAZORPAY",
                             payment: {
                                 razorpayPaymentId: response.razorpay_payment_id,
                                 razorpayOrderId: response.razorpay_order_id,

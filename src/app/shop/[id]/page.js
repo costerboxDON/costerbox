@@ -62,6 +62,10 @@ export default function ProductDetailsPage() {
                     }
                 }
 
+                if (data && String(data.status || 'Active').toLowerCase() !== 'active') {
+                    data = null;
+                }
+
                 if (data) {
                     setProduct(data);
 

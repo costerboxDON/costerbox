@@ -276,8 +276,10 @@ function OrderDrawer({ order, onClose, onUpdate, formatDate, getProductInfo }) {
     const [actionMsg, setActionMsg] = useState(null); // { type: 'success'|'error', text }
 
     const p = getProductInfo(order);
-    const isCOD = order.paymentMethod === 'CD';
-    const canRefund = !isCOD && order.payment?.razorpayPaymentId && !['refunded', 'cancelled'].includes(order.status);
+    const rawPaymentId = order.payment?.razorpayPaymentId || order.payment?.razorpay_payment_id || order.razorpayPaymentId || order.razorpay_payment_id || '';
+    const isCOD = order.paymentMethod === 'CD' || order.paymentMethod === 'COD' || order.payment?.type === 'COD' || rawPaymentId === 'COD' || String(rawPaymentId).toUpperCase() === 'COD';
+    const razorpayPaymentId = (!isCOD && rawPaymentId && rawPaymentId !== 'COD') ? rawPaymentId : null;
+    const canRefund = !['refunded', 'cancelled'].includes(order.status);
     const totalAmount = Number(order.totalAmount || order.payment?.totalAmount || order.payment?.paidAmount || 0);
 
     const showMsg = (type, text) => {
@@ -300,8 +302,8 @@ function OrderDrawer({ order, onClose, onUpdate, formatDate, getProductInfo }) {
     };
 
     const handleRefund = async () => {
-        if (!order.payment?.razorpayPaymentId) {
-            showMsg('error', 'No Razorpay Payment ID found on this order. Cannot process refund.');
+        if (!razorpayPaymentId) {
+            showMsg('error', 'No valid Razorpay Payment ID found on this order. Use manual refund option below.');
             return;
         }
         const amt = refundAmount ? Number(refundAmount) : totalAmount;
@@ -313,7 +315,7 @@ function OrderDrawer({ order, onClose, onUpdate, formatDate, getProductInfo }) {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({
-                    paymentId: order.payment.razorpayPaymentId,
+                    paymentId: razorpayPaymentId,
                     amount: amt,
                     reason: refundReason,
                 }),
@@ -337,6 +339,32 @@ function OrderDrawer({ order, onClose, onUpdate, formatDate, getProductInfo }) {
             showMsg('success', `✅ Refund of ₹${data.amount} initiated! Refund ID: ${data.refundId}. Customer will receive funds in 3–5 business days.`);
         } catch (e) {
             showMsg('error', `Refund failed: ${e.message}`);
+        }
+        setRefundLoading(false);
+    };
+
+    const handleManualRefund = async () => {
+        const amt = refundAmount ? Number(refundAmount) : totalAmount;
+        if (!confirm(`Record a manual / COD refund of ₹${amt} for this order?\n\nThis will update order status to "refunded".`)) return;
+
+        setRefundLoading(true);
+        try {
+            const manualRefundId = `MANUAL-${Date.now()}`;
+            await updateDoc(doc(db, 'orders', order.id), {
+                status: 'refunded',
+                refund: {
+                    id: manualRefundId,
+                    amount: amt,
+                    status: 'manual_processed',
+                    reason: refundReason,
+                    initiatedAt: new Date().toISOString(),
+                },
+                updatedAt: serverTimestamp(),
+            });
+            onUpdate({ id: order.id, status: 'refunded', refund: { id: manualRefundId, amount: amt, status: 'manual_processed' } });
+            showMsg('success', `✅ Manual refund of ₹${amt} recorded successfully! Order marked as Refunded.`);
+        } catch (e) {
+            showMsg('error', `Manual refund failed: ${e.message}`);
         }
         setRefundLoading(false);
     };
@@ -504,10 +532,10 @@ function OrderDrawer({ order, onClose, onUpdate, formatDate, getProductInfo }) {
 
                             {/* Payment */}
                             <Section title="Payment">
-                                <Row label="Method" value={order.paymentMethod === 'CD' ? 'Cash on Delivery' : 'Prepaid (Razorpay)'} />
+                                <Row label="Method" value={isCOD ? 'Cash on Delivery (COD)' : 'Prepaid (Razorpay)'} />
                                 <Row label="Total Amount" value={`₹${totalAmount}`} bold />
-                                {order.payment?.paidAmount && <Row label="Paid Amount" value={`₹${order.payment.paidAmount}`} />}
-                                {order.payment?.razorpayPaymentId && <Row label="Razorpay Payment ID" value={order.payment.razorpayPaymentId} mono />}
+                                {order.payment?.paidAmount ? <Row label="Paid Amount" value={`₹${order.payment.paidAmount}`} /> : null}
+                                {razorpayPaymentId && <Row label="Razorpay Payment ID" value={razorpayPaymentId} mono />}
                                 {order.payment?.razorpayOrderId && <Row label="Razorpay Order ID" value={order.payment.razorpayOrderId} mono />}
                                 {order.refund && (
                                     <div style={{ marginTop: '10px', padding: '10px', background: '#ede9fe', borderRadius: '8px', border: '1px solid #c4b5fd' }}>
@@ -617,28 +645,18 @@ function OrderDrawer({ order, onClose, onUpdate, formatDate, getProductInfo }) {
                             </Section>
 
                             {/* Refund */}
-                            <Section title="Issue Refund (Razorpay)">
-                                {isCOD ? (
-                                    <div style={{ padding: '12px', background: '#fef3c7', borderRadius: '8px', border: '1px solid #fde68a', fontSize: '13px', color: '#78350f' }}>
-                                        ⚠️ This is a <strong>COD order</strong>. Razorpay refunds are not applicable. Process a manual refund or bank transfer directly.
-                                    </div>
-                                ) : !order.payment?.razorpayPaymentId ? (
-                                    <div style={{ padding: '12px', background: '#fef2f2', borderRadius: '8px', border: '1px solid #fecaca', fontSize: '13px', color: '#991b1b' }}>
-                                        ❌ No Razorpay Payment ID found on this order. Cannot initiate an online refund.
-                                    </div>
-                                ) : order.status === 'refunded' ? (
+                            <Section title="Issue Refund / Record Return">
+                                {order.status === 'refunded' ? (
                                     <div style={{ padding: '12px', background: '#ede9fe', borderRadius: '8px', border: '1px solid #c4b5fd', fontSize: '13px', color: '#5b21b6' }}>
                                         ✅ This order has already been refunded.
-                                        {order.refund && <div style={{ marginTop: '6px' }}>Refund ID: <code>{order.refund.id}</code> · ₹{order.refund.amount}</div>}
+                                        {order.refund && <div style={{ marginTop: '6px' }}>Refund ID: <code>{order.refund.id}</code> · ₹{order.refund.amount} ({order.refund.status || 'completed'})</div>}
                                     </div>
-                                ) : (
+                                ) : isCOD || !razorpayPaymentId ? (
                                     <>
-                                        <div style={{ padding: '10px', background: '#f0fdf4', borderRadius: '8px', border: '1px solid #bbf7d0', fontSize: '12px', color: '#166534', marginBottom: '14px' }}>
-                                            <ShieldCheck size={13} style={{ marginRight: '4px' }} />
-                                            Refund will be sent to the customer's original payment method (card/UPI/wallet). Typically takes <strong>3–5 business days</strong>.
+                                        <div style={{ padding: '10px', background: '#fef3c7', borderRadius: '8px', border: '1px solid #fde68a', fontSize: '12px', color: '#78350f', marginBottom: '14px' }}>
+                                            ⚠️ This is a <strong>COD / Manual payment order</strong>. Razorpay online automated refund is not available. Process the refund manually (cash/bank transfer) and record it below to set the status to <strong>Refunded</strong>.
                                         </div>
 
-                                        <Row label="Razorpay Payment ID" value={order.payment.razorpayPaymentId} mono />
                                         <Row label="Total Order Amount" value={`₹${totalAmount}`} bold />
 
                                         <label style={{ ...S.label, marginTop: '14px' }}>Refund Amount (₹)</label>
@@ -651,7 +669,48 @@ function OrderDrawer({ order, onClose, onUpdate, formatDate, getProductInfo }) {
                                             min="1"
                                             max={totalAmount}
                                         />
-                                        <div style={{ fontSize: '11px', color: '#94a3b8', marginTop: '4px' }}>Leave blank to issue a full refund of ₹{totalAmount}</div>
+                                        <div style={{ fontSize: '11px', color: '#94a3b8', marginTop: '4px' }}>Leave blank to log full refund of ₹{totalAmount}</div>
+
+                                        <label style={{ ...S.label, marginTop: '12px' }}>Reason / Notes</label>
+                                        <select value={refundReason} onChange={e => setRefundReason(e.target.value)} style={S.input}>
+                                            <option>Customer requested return (COD)</option>
+                                            <option>Product damaged / defective</option>
+                                            <option>Wrong item delivered</option>
+                                            <option>Order cancelled by admin</option>
+                                            <option>Bank transfer / Cash refunded</option>
+                                            <option>Customer changed mind</option>
+                                        </select>
+
+                                        <button
+                                            onClick={handleManualRefund}
+                                            disabled={refundLoading}
+                                            style={{ ...S.primaryBtn, background: refundLoading ? '#9ca3af' : '#dc2626', marginTop: '16px' }}
+                                        >
+                                            <RotateCcw size={15} />
+                                            {refundLoading ? 'Processing...' : `Mark Order as Refunded (Manual/COD) · ₹${refundAmount || totalAmount}`}
+                                        </button>
+                                    </>
+                                ) : (
+                                    <>
+                                        <div style={{ padding: '10px', background: '#f0fdf4', borderRadius: '8px', border: '1px solid #bbf7d0', fontSize: '12px', color: '#166534', marginBottom: '14px' }}>
+                                            <ShieldCheck size={13} style={{ marginRight: '4px' }} />
+                                            Refund will be sent automatically via Razorpay to the customer's original payment method. Typically takes <strong>3–5 business days</strong>.
+                                        </div>
+
+                                        <Row label="Razorpay Payment ID" value={razorpayPaymentId} mono />
+                                        <Row label="Total Order Amount" value={`₹${totalAmount}`} bold />
+
+                                        <label style={{ ...S.label, marginTop: '14px' }}>Refund Amount (₹)</label>
+                                        <input
+                                            type="number"
+                                            value={refundAmount}
+                                            onChange={e => setRefundAmount(e.target.value)}
+                                            placeholder={`Full refund: ₹${totalAmount}`}
+                                            style={S.input}
+                                            min="1"
+                                            max={totalAmount}
+                                        />
+                                        <div style={{ fontSize: '11px', color: '#94a3b8', marginTop: '4px' }}>Leave blank to issue full refund of ₹{totalAmount}</div>
 
                                         <label style={{ ...S.label, marginTop: '12px' }}>Reason</label>
                                         <select value={refundReason} onChange={e => setRefundReason(e.target.value)} style={S.input}>
@@ -669,7 +728,7 @@ function OrderDrawer({ order, onClose, onUpdate, formatDate, getProductInfo }) {
                                             style={{ ...S.primaryBtn, background: refundLoading ? '#9ca3af' : '#dc2626', marginTop: '16px' }}
                                         >
                                             <RotateCcw size={15} />
-                                            {refundLoading ? 'Processing Refund...' : `Initiate Refund · ₹${refundAmount || totalAmount}`}
+                                            {refundLoading ? 'Processing Refund...' : `Initiate Razorpay Refund · ₹${refundAmount || totalAmount}`}
                                         </button>
                                     </>
                                 )}

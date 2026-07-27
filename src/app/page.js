@@ -58,21 +58,22 @@ export default function HomePage() {
   }, []);
 
   // ========= DERIVE PRODUCT SECTIONS FROM TAGS =========
+  const isActiveProduct = p => String(p.status || 'Active').toLowerCase() === 'active';
   const hasManagedProducts = homeSettings?.homeProducts?.length > 0;
   const managedProducts = hasManagedProducts 
-    ? allProducts.filter(p => homeSettings.homeProducts.includes(p.id) && String(p.status || "").toLowerCase() === 'active')
+    ? allProducts.filter(p => homeSettings.homeProducts.includes(p.id) && isActiveProduct(p))
     : [];
   const newArrivals = allProducts.filter(p =>
-    Array.isArray(p.tags) && p.tags.includes('new-arrival') && p.status === 'Active'
+    Array.isArray(p.tags) && p.tags.includes('new-arrival') && isActiveProduct(p)
   ).slice(0, 8);
 
   const bestsellers = allProducts.filter(p =>
-    Array.isArray(p.tags) && p.tags.includes('bestseller') && p.status === 'Active'
+    Array.isArray(p.tags) && p.tags.includes('bestseller') && isActiveProduct(p)
   ).slice(0, 8);
 
   // Featured products (fallback to latest if no tags)
   const featuredProducts = allProducts.filter(p =>
-    Array.isArray(p.tags) && p.tags.includes('featured') && p.status === 'Active'
+    Array.isArray(p.tags) && p.tags.includes('featured') && isActiveProduct(p)
   ).slice(0, 8);
 
   // Get product image

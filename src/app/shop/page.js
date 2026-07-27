@@ -35,9 +35,9 @@ function ShopPageContent() {
                 setCategories(catSnap.docs.map(d => d.data().name).filter(Boolean));
 
                 const prodSnap = await getDocs(collection(db, 'products'));
-                // Archive shows ONLY customizable products
+                // Archive shows ONLY customizable active products
                 const allProds = prodSnap.docs.map(d => ({ id: d.id, ...d.data() }));
-                setProducts(allProds.filter(p => p.isCustomizable === true));
+                setProducts(allProds.filter(p => p.isCustomizable === true && String(p.status || 'Active').toLowerCase() === 'active'));
 
                 setLoading(false);
             } catch (error) {

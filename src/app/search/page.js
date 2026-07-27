@@ -38,14 +38,16 @@ function SearchContent() {
         querySnapshot.forEach((doc) => {
            // We process data once here to make search faster later
            const data = doc.data();
-           products.push({
-             id: doc.id,
-             ...data,
-             type: 'product',
-             // Create a "search string" for super fast checking
-             // Combines name, category, and keywords into one lowercase string
-             searchStr: `${data.name} ${data.category} ${(data.keywords || []).join(" ")}`.toLowerCase()
-           });
+           if (String(data.status || 'Active').toLowerCase() === 'active') {
+             products.push({
+               id: doc.id,
+               ...data,
+               type: 'product',
+               // Create a "search string" for super fast checking
+               // Combines name, category, and keywords into one lowercase string
+               searchStr: `${data.name} ${data.category} ${(data.keywords || []).join(" ")}`.toLowerCase()
+             });
+           }
         });
 
         setAllProducts(products);

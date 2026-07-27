@@ -30,8 +30,10 @@ function ProductsPageContent() {
                 setCategories(catSnap.docs.map(d => d.data().name).filter(Boolean));
 
                 const prodSnap = await getDocs(collection(db, 'products'));
-                // Products page shows ONLY non-customizable (direct shipping) products
-                const allProds = prodSnap.docs.map(d => ({ id: d.id, ...d.data() }));
+                // Products page shows ONLY active products
+                const allProds = prodSnap.docs
+                    .map(d => ({ id: d.id, ...d.data() }))
+                    .filter(p => String(p.status || 'Active').toLowerCase() === 'active');
                 setProducts(allProds);
 
                 setLoading(false);
