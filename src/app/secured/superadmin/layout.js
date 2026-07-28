@@ -81,6 +81,8 @@ export default function SuperAdminLayout({ children }) {
           <Link href="/secured/superadmin/manage-products" style={styles.link}>📦 Inventory</Link>
           <Link href="/secured/superadmin/orders" style={styles.link}>🛒 Orders</Link>
           <Link href="/secured/superadmin/shipping" style={styles.link}>🚚 Shipping</Link>
+          <Link href="/secured/superadmin/razorpay" style={styles.link}>💳 Razorpay</Link>
+          <Link href="/secured/superadmin/coupons" style={styles.link}>🎟️ Coupons</Link>
           <Link href="/secured/superadmin/seo" style={styles.link}>🔍 SEO</Link>
           <Link href="/secured/superadmin/blog" style={styles.link}>📝 Blog</Link>
         </nav>

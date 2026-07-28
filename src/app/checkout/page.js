@@ -1,7 +1,7 @@
 "use client";
 import { useState, useEffect, Suspense } from "react";
 import { useSearchParams, useRouter } from "next/navigation";
-import { doc, getDoc, addDoc, collection, serverTimestamp } from "firebase/firestore";
+import { doc, getDoc, addDoc, collection, serverTimestamp, query, where, getDocs, updateDoc, increment } from "firebase/firestore";
 import { db } from "../../lib/firebase";
 import { useAuth } from "../../context/AuthContext";
 import { useCart } from "../../context/CartContext";
@@ -36,6 +36,12 @@ function CheckoutContent() {
     });
 
     const [paymentNetworkMethod, setPaymentNetworkMethod] = useState('online'); // 'online' or 'cod'
+
+    // --- COUPON ---
+    const [couponInput, setCouponInput] = useState('');
+    const [appliedCoupon, setAppliedCoupon] = useState(null); // { id, code, type, value, ... }
+    const [couponError, setCouponError] = useState('');
+    const [couponApplying, setCouponApplying] = useState(false);
 
     // --- INITIALIZE CHECKOUT ITEMS ---
     useEffect(() => {
@@ -106,10 +112,59 @@ function CheckoutContent() {
             totalRaw += itemFullPrice * qty;
         });
 
-        return { totalRaw, totalPayable: totalRaw };
+        let discount = 0;
+        if (appliedCoupon) {
+            discount = appliedCoupon.type === 'percentage'
+                ? Math.round(totalRaw * (appliedCoupon.value / 100))
+                : appliedCoupon.value;
+            discount = Math.min(discount, totalRaw);
+        }
+
+        return { totalRaw, discount, totalPayable: Math.max(0, totalRaw - discount) };
     };
 
-    const { totalRaw, totalPayable } = calculateTotals();
+    const { totalRaw, discount, totalPayable } = calculateTotals();
+
+    const handleApplyCoupon = async () => {
+        const code = couponInput.trim().toUpperCase();
+        setCouponError('');
+        if (!code) return;
+
+        setCouponApplying(true);
+        try {
+            const snap = await getDocs(query(collection(db, 'coupons'), where('code', '==', code)));
+            if (snap.empty) {
+                setCouponError('Invalid coupon code.');
+                setCouponApplying(false);
+                return;
+            }
+            const couponDoc = snap.docs[0];
+            const coupon = { id: couponDoc.id, ...couponDoc.data() };
+
+            if (!coupon.active) {
+                setCouponError('This coupon is no longer active.');
+            } else if (coupon.expiryDate && new Date(coupon.expiryDate) < new Date(new Date().toDateString())) {
+                setCouponError('This coupon has expired.');
+            } else if (coupon.usageLimit != null && coupon.usageCount >= coupon.usageLimit) {
+                setCouponError('This coupon has reached its usage limit.');
+            } else if (coupon.minOrderValue && totalRaw < coupon.minOrderValue) {
+                setCouponError(`This coupon requires a minimum order of ₹${coupon.minOrderValue}.`);
+            } else {
+                setAppliedCoupon(coupon);
+                setCouponError('');
+            }
+        } catch (err) {
+            console.error('Coupon validation error:', err);
+            setCouponError('Could not validate coupon. Please try again.');
+        }
+        setCouponApplying(false);
+    };
+
+    const handleRemoveCoupon = () => {
+        setAppliedCoupon(null);
+        setCouponInput('');
+        setCouponError('');
+    };
 
 
     const handleChange = (e) => {
@@ -204,12 +259,18 @@ function CheckoutContent() {
                         totalAmount: totalRaw,
                         type: "COD"
                     },
+                    couponCode: appliedCoupon?.code || null,
+                    discountAmount: discount,
                     orderId: `ORD-COD-${Date.now()}-${Math.floor(Math.random() * 1000)}`,
                     status: "unpaid",
                     createdAt: serverTimestamp()
                 };
 
                 const docRef = await addDoc(collection(db, "orders"), safePayload);
+
+                if (appliedCoupon) {
+                    updateDoc(doc(db, 'coupons', appliedCoupon.id), { usageCount: increment(1) }).catch(console.error);
+                }
 
                 if (!productId) {
                     clearCart();
@@ -317,6 +378,8 @@ function CheckoutContent() {
                                 type: "FULL_PAYMENT",
                                 verified: true,
                             },
+                            couponCode: appliedCoupon?.code || null,
+                            discountAmount: discount,
 
                             orderId: `ORD-${Date.now()}-${Math.floor(Math.random() * 1000)}`,
                             status: "paid",
@@ -324,6 +387,10 @@ function CheckoutContent() {
                         };
 
                         const docRef = await addDoc(collection(db, "orders"), safePayload);
+
+                        if (appliedCoupon) {
+                            updateDoc(doc(db, 'coupons', appliedCoupon.id), { usageCount: increment(1) }).catch(console.error);
+                        }
 
                         // Clear Cart ONLY if checking out from Cart
                         if (!productId) {
@@ -429,10 +496,52 @@ function CheckoutContent() {
                         ))}
                     </div>
 
+                    {/* COUPON */}
+                    <div style={{ marginBottom: '15px' }}>
+                        {appliedCoupon ? (
+                            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '10px 14px', background: '#f0fdf4', border: '1px solid #bbf7d0', borderRadius: '8px' }}>
+                                <span style={{ fontSize: '13px', color: '#166534', fontWeight: 600 }}>
+                                    "{appliedCoupon.code}" applied
+                                </span>
+                                <button onClick={handleRemoveCoupon} style={{ background: 'none', border: 'none', color: '#166534', textDecoration: 'underline', cursor: 'pointer', fontSize: '12px' }}>
+                                    Remove
+                                </button>
+                            </div>
+                        ) : (
+                            <div>
+                                <div style={{ display: 'flex', gap: '8px' }}>
+                                    <input
+                                        placeholder="Coupon code"
+                                        value={couponInput}
+                                        onChange={e => setCouponInput(e.target.value.toUpperCase())}
+                                        className="input-field"
+                                        style={{ flex: 1 }}
+                                    />
+                                    <button
+                                        type="button"
+                                        onClick={handleApplyCoupon}
+                                        disabled={couponApplying || !couponInput.trim()}
+                                        style={{ padding: '0 18px', background: '#1a1a1a', color: '#fff', border: 'none', borderRadius: '6px', fontSize: '13px', fontWeight: 600, cursor: 'pointer' }}
+                                    >
+                                        {couponApplying ? '...' : 'Apply'}
+                                    </button>
+                                </div>
+                                {couponError && <p style={{ color: '#dc2626', fontSize: '12px', marginTop: '6px' }}>{couponError}</p>}
+                            </div>
+                        )}
+                    </div>
+
                     <div className="price-row">
                         <span>Subtotal</span>
                         <span>₹{totalRaw.toLocaleString('en-IN')}</span>
                     </div>
+
+                    {discount > 0 && (
+                        <div className="price-row" style={{ color: '#166534' }}>
+                            <span>Discount ({appliedCoupon.code})</span>
+                            <span>-₹{discount.toLocaleString('en-IN')}</span>
+                        </div>
+                    )}
 
                     <div className="total-row">
                         <span>Total Payable</span>
