@@ -62,7 +62,6 @@ export default function LoginPage() {
 
       // 3. Redirect based on Role
       if (role === 'superadmin') router.push('/secured/superadmin/');
-      else if (role === 'artisan') router.push('/secured/artisan/dashboard');
       else router.push('/shop'); // Customers go here
 
     } catch (err) {

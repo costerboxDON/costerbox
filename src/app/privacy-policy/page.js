@@ -18,7 +18,7 @@ export default function PrivacyPolicyPage() {
             <p>When you browse or place an order on Costerbox, we may collect the following types of information:</p>
             <ul>
                 <li>Personal details such as your full name, billing address, shipping address, email address, and mobile number.</li>
-                <li>Order-related information including products purchased, customization details, order history, and communication records.</li>
+                <li>Order-related information including products purchased, order history, and communication records.</li>
                 <li>Payment-related information necessary to process transactions securely through third-party payment gateways (we do not store card or banking details).</li>
                 <li>Technical data such as IP address, browser type, device information, and cookies for analytics and website optimization.</li>
             </ul>

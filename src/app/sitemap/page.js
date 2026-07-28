@@ -19,13 +19,6 @@ const SITEMAP_SECTIONS = [
         ]
     },
     {
-        title: 'Custom Orders',
-        links: [
-            { label: 'Bespoke — Create Your Own', href: '/custom/bespoke' },
-            { label: 'Upcycled Products', href: '/custom/upcycle' },
-        ]
-    },
-    {
         title: 'Company',
         links: [
             { label: 'About Us', href: '/about' },
@@ -50,7 +43,6 @@ const SITEMAP_SECTIONS = [
             { label: 'Refund & Returns Policy', href: '/refund-policy' },
             { label: 'Cancellation Policy', href: '/cancellation-policy' },
             { label: 'International Orders Policy', href: '/international-orders' },
-            { label: 'Custom Orders Policy', href: '/custom-orders' },
             { label: 'Terms & Conditions', href: '/terms-conditions' },
         ]
     },

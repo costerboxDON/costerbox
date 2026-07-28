@@ -13,8 +13,7 @@ function getHeaders() {
     };
 }
 
-// Create a shipment (Marketplace model)
-// payload.seller_* = artisan's pickup address (courier dispatched here)
+// Create a shipment — always picked up from your single registered warehouse
 // payload.pickup_location.name = your ONE master registered warehouse
 export async function createDelhiveryShipment(payload) {
     const res = await axios.post(
@@ -29,7 +28,7 @@ export async function createDelhiveryShipment(payload) {
 }
 
 // Register or update your master pickup location (run ONCE during initial setup)
-// Under the Marketplace model you only ever need one of these for your whole platform
+// You only ever need one of these for your whole platform
 export async function registerPickupLocation(warehouseData) {
     const headers = getHeaders();
     try {

@@ -6,7 +6,7 @@ import Footer from './Footer';
 export default function ConditionalFooter() {
     const pathname = usePathname();
 
-    // Hide footer on all /secured/* pages (admin, artisan, superadmin panels)
+    // Hide footer on all /secured/* pages (admin, superadmin panels)
     if (pathname.startsWith('/secured')) {
         return null;
     }

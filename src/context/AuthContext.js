@@ -11,7 +11,7 @@ export const useAuth = () => useContext(AuthContext);
 
 export const AuthProvider = ({ children }) => {
     const [user, setUser] = useState(null);
-    const [role, setRole] = useState(null); // <--- Store their Role (admin/artisan)
+    const [role, setRole] = useState(null); // <--- Store their Role (user/superadmin)
     const [loading, setLoading] = useState(true);
 
     useEffect(() => {
@@ -45,7 +45,7 @@ export const AuthProvider = ({ children }) => {
                                 console.warn(`Security: User ${firebaseUser.email} has 'superadmin' in DB but is not whitelisted. Downgrading to 'user'.`);
                                 setRole('user');
                             } else {
-                                setRole(dbRole); // Allow 'artisan' or 'user' roles to pass through
+                                setRole(dbRole); // Allow 'user' role to pass through
                             }
                         } else {
                             console.warn("User document not found. Defaulting to 'user' role.");

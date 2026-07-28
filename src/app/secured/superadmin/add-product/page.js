@@ -815,32 +815,10 @@ function AddProductContent() {
                             </select>
                         </div>
 
-                        {/* CUSTOMIZATION TOGGLE */}
-                        <div className="form-group" style={{ marginTop: '15px', paddingTop: '15px', borderTop: '1px solid #eee' }}>
-                            <label style={{ display: 'flex', alignItems: 'center', gap: '10px', cursor: 'pointer' }}>
-                                <input
-                                    type="checkbox"
-                                    name="isCustomizable"
-                                    checked={formData.isCustomizable || false}
-                                    onChange={(e) => setFormData({ ...formData, isCustomizable: e.target.checked })}
-                                    style={{ width: '18px', height: '18px' }}
-                                />
-                                <span style={{ fontWeight: '500' }}>Is Customizable?</span>
-                            </label>
-                            <p className="helper-text" style={{ marginLeft: '28px', marginTop: '5px' }}>
-                                If checked, users pay 70% advance. Orders are routed to zonal artisans for acceptance.
-                            </p>
-                        </div>
-
                         <div style={{ marginTop: '10px' }}>
                             <span className={`status-badge ${formData.status === 'Active' ? 'status-active' : 'status-draft'}`}>
                                 {formData.status}
                             </span>
-                            {formData.isCustomizable && (
-                                <span className="status-badge" style={{ background: '#e0f2fe', color: '#0369a1', marginLeft: '5px' }}>
-                                    Custom
-                                </span>
-                            )}
                         </div>
                     </div>
 

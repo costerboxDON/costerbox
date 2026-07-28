@@ -2,7 +2,7 @@
 import { NextResponse } from 'next/server';
 import { db } from '../../../../lib/firebase';
 import { doc, getDoc, updateDoc } from 'firebase/firestore';
-import { createShiprocketOrder, addPickupLocation, getPickupLocations, assignAWB } from '../../../../lib/shiprocket';
+import { createShiprocketOrder, getPickupLocations, assignAWB } from '../../../../lib/shiprocket';
 
 export async function POST(req) {
     try {
@@ -32,78 +32,24 @@ export async function POST(req) {
         console.log("Order Data Found:", JSON.stringify(order, null, 2));
         let pickup_location_id = 'Primary';
 
-        // 2. If Custom Order, Ensure Artisan Pickup Location Exists
-        if (order.isCustomOrder && order.artisanId) {
-            const artisanEmail = order.artisanEmail;
-            if (!artisanEmail) throw new Error("Artisan email missing in order.");
-
-            const artisanRef = doc(db, "users", artisanEmail);
-            const artisanSnap = await getDoc(artisanRef);
-
-            if (!artisanSnap.exists()) throw new Error("Artisan profile not found.");
-
-            const artisan = artisanSnap.data();
-            const address = artisan.pickupAddress;
-
-            if (!address || !address.line1 || !address.city) {
-                return NextResponse.json({
-                    success: false,
-                    message: `Artisan ${artisan.name} has not set a COMPLETE pickup address.`
-                }, { status: 400 });
-            }
-
-            // Create unique pickup code for artisan
-            // Shiprocket Pickup Location Code must be less than 50 chars.
-            // Use sanitized email or ID.
-            const pickupCode = `artisan_${artisanEmail.replace(/[^a-zA-Z0-9]/g, '').substring(0, 20)}`;
-
-            try {
-                await addPickupLocation({
-                    pickup_location: pickupCode,
-                    name: (artisan.name || "Artisan").substring(0, 50),
-                    email: artisan.email,
-                    phone: (address.phone || "9999999999").replace(/[^0-9]/g, '').slice(-10),
-                    address: (address.line1 || "Address").substring(0, 80),
-                    city: address.city,
-                    state: address.state || "Rajasthan",
-                    country: 'India',
-                    pin_code: (address.pincode || "302001").toString().substring(0, 6)
-                });
-            } catch (e) {
-                const apiError = e.response?.data;
-                const errorStr = JSON.stringify(apiError || e.message);
-                
-                // If it already exists, Shiprocket usually returns a validation error on 'pickup_location'
-                // We can ignore it.
-                if (errorStr.toLowerCase().includes("exists") || errorStr.toLowerCase().includes("already") || errorStr.toLowerCase().includes("taken")) {
-                    console.log(`Pickup location ${pickupCode} already exists or handled by Shiprocket. continuing...`);
-                } else {
-                    console.error("Pickup location add FATAL error:", errorStr);
-                    // It's safer to attempt to proceed anyway because the location MIGHT exist,
-                    // but if it doesn't, createShiprocketOrder will now safely fail and return 400.
+        // Ensure we have a valid pickup location (single registered warehouse)
+        try {
+            const locations = await getPickupLocations();
+            if (locations && locations.length > 0) {
+                const hasPrimary = locations.some(l => l.pickup_location === 'Primary');
+                if (!hasPrimary) {
+                    pickup_location_id = locations[0].pickup_location;
+                    console.log(`'Primary' location not found. Defaulting to: ${pickup_location_id}`);
                 }
+            } else {
+                console.log("No pickup locations found in Shiprocket account. Attempting 'Primary'...");
             }
-            pickup_location_id = pickupCode;
-        } else {
-            // For standard orders, ensure we have a valid pickup location
-            try {
-                const locations = await getPickupLocations();
-                if (locations && locations.length > 0) {
-                    const hasPrimary = locations.some(l => l.pickup_location === 'Primary');
-                    if (!hasPrimary) {
-                        pickup_location_id = locations[0].pickup_location;
-                        console.log(`'Primary' location not found. Defaulting to: ${pickup_location_id}`);
-                    }
-                } else {
-                    console.log("No pickup locations found in Shiprocket account. Attempting 'Primary'...");
-                }
-            } catch (e) {
-                // If it's a configuration error, don't swallow it. Stop here.
-                if (e.message.includes("Credentials") || e.message.includes("Invalid Email") || e.message.includes("Login Failed")) {
-                    return NextResponse.json({ success: false, error: e.message }, { status: 401 });
-                }
-                console.warn("Failed to fetch pickup locations, defaulting to 'Primary':", e.message);
+        } catch (e) {
+            // If it's a configuration error, don't swallow it. Stop here.
+            if (e.message.includes("Credentials") || e.message.includes("Invalid Email") || e.message.includes("Login Failed")) {
+                return NextResponse.json({ success: false, error: e.message }, { status: 401 });
             }
+            console.warn("Failed to fetch pickup locations, defaulting to 'Primary':", e.message);
         }
 
         // 3. Create Order Payload

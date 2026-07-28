@@ -40,8 +40,6 @@ export default function Footer() {
             <h4>MORE INFO</h4>
             <ul>
               <li><a href="/our-family">Our Family</a></li>
-              <li><a href="/custom/bespoke">Create Your Own</a></li>
-              <li><a href="/custom/upcycle">Upcycled</a></li>
             </ul>
           </div>
 

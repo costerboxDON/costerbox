@@ -1,17 +1,15 @@
 /* src/app/secured/superadmin/orders/page.js */
 "use client";
 import React, { useEffect, useState } from 'react';
-import { collection, getDocs, doc, updateDoc, serverTimestamp, writeBatch, deleteDoc } from 'firebase/firestore';
+import { collection, getDocs, doc, updateDoc, serverTimestamp, writeBatch } from 'firebase/firestore';
 import { db } from '../../../../lib/firebase';
-import { Package, Truck, CheckCircle, MapPin, MessageCircle, Search, Trash2, RefreshCw, RotateCcw, AlertTriangle, X, ChevronRight, ExternalLink, ClipboardList, ShieldCheck, Ban } from 'lucide-react';
+import { Truck, MapPin, Search, Trash2, RefreshCw, RotateCcw, X, ChevronRight, ExternalLink, ClipboardList, ShieldCheck, Ban } from 'lucide-react';
 
 // ─── STATUS helpers ───────────────────────────────────────────────────────────
 const STATUS_CONFIG = {
+    unpaid:                     { label: 'Placed (COD)',         bg: '#fef9c3', color: '#854d0e' },
     pending:                    { label: 'Pending',              bg: '#fef9c3', color: '#854d0e' },
     paid:                       { label: 'Processing (Paid)',    bg: '#e0f2fe', color: '#0369a1' },
-    pending_artisan_acceptance: { label: 'Awaiting Artisan',     bg: '#ffedd5', color: '#c2410c' },
-    accepted_by_artisan:        { label: 'Accepted by Artisan',  bg: '#d1fae5', color: '#065f46' },
-    product_ready_by_artisan:   { label: 'Ready for Dispatch',   bg: '#fef08a', color: '#854d0e' },
     shipped:                    { label: 'Shipped',              bg: '#dbeafe', color: '#1e40af' },
     delivered:                  { label: 'Delivered',            bg: '#dcfce7', color: '#166534' },
     return_requested:           { label: 'Return Requested',     bg: '#fce7f3', color: '#9d174d' },
@@ -224,9 +222,15 @@ export default function AdminOrdersPage() {
                                     </td>
                                     <td style={S.td}>
                                         <div style={{ fontWeight: '700' }}>₹{order.totalAmount || order.payment?.totalAmount || order.payment?.paidAmount || '—'}</div>
-                                        <div style={{ fontSize: '10px', color: order.paymentMethod === 'CD' ? '#f59e0b' : '#10b981', fontWeight: '600' }}>
-                                            {order.paymentMethod === 'CD' ? 'COD' : 'PREPAID'}
-                                        </div>
+                                        {(() => {
+                                            const rawId = order.payment?.razorpayPaymentId || order.payment?.razorpay_payment_id || order.razorpayPaymentId || order.razorpay_payment_id || '';
+                                            const isCOD = order.paymentMethod === 'COD' || order.payment?.type === 'COD' || String(rawId).toUpperCase() === 'COD';
+                                            return (
+                                                <div style={{ fontSize: '10px', color: isCOD ? '#f59e0b' : '#10b981', fontWeight: '600' }}>
+                                                    {isCOD ? 'COD' : 'PREPAID'}
+                                                </div>
+                                            );
+                                        })()}
                                     </td>
                                     <td style={S.td}><StatusBadge status={order.status} /></td>
                                     <td style={S.td}>
@@ -399,8 +403,7 @@ function OrderDrawer({ order, onClose, onUpdate, formatDate, getProductInfo }) {
     };
 
     const handleDelhivery = async () => {
-        if (!order.artisanEmail) { showMsg('error', 'No artisan linked. Assign an artisan first.'); return; }
-        if (!confirm(`Create Delhivery consignment? Pickup from artisan: ${order.artisanEmail}`)) return;
+        if (!confirm(`Create Delhivery consignment for order #${order.orderId || order.id}?`)) return;
         setDelhiveryLoading(true);
         try {
             const res = await fetch('/api/delhivery/create-order', {
@@ -547,27 +550,6 @@ function OrderDrawer({ order, onClose, onUpdate, formatDate, getProductInfo }) {
                                 )}
                             </Section>
 
-                            {/* Artisan */}
-                            {order.artisanEmail && (
-                                <Section title="Artisan">
-                                    <Row label="Email" value={order.artisanEmail} />
-                                    {order.artisanName && <Row label="Name" value={order.artisanName} />}
-                                </Section>
-                            )}
-
-                            {/* 30% Due Notice */}
-                            {order.status === 'product_ready_by_artisan' && order.payment?.type === 'PARTIAL_ADVANCE' && (
-                                <div style={{ padding: '14px', background: '#fef08a', borderRadius: '10px', border: '1px solid #ca8a04' }}>
-                                    <div style={{ fontSize: '13px', fontWeight: '700', color: '#854d0e', marginBottom: '6px' }}>⚠️ 30% Due from Customer</div>
-                                    <div style={{ fontSize: '12px', color: '#78350f' }}>Artisan has marked the product as ready. Customer must pay the remaining 30% before dispatch.</div>
-                                    <button
-                                        style={{ marginTop: '10px', background: '#ca8a04', color: '#fff', border: 'none', borderRadius: '6px', padding: '7px 14px', fontSize: '12px', fontWeight: '600', cursor: 'pointer' }}
-                                        onClick={() => alert(`Notice: Payment link sent to ${order.shipping?.phone} & ${order.userEmail}`)}
-                                    >
-                                        <MessageCircle size={13} style={{ marginRight: '5px' }} /> Notify Customer
-                                    </button>
-                                </div>
-                            )}
                         </div>
                     )}
 
@@ -613,14 +595,8 @@ function OrderDrawer({ order, onClose, onUpdate, formatDate, getProductInfo }) {
                             </Section>
 
                             {/* Delhivery */}
-                            <Section title="Auto-Ship via Delhivery (Artisan Pickup)">
-                                {!order.artisanEmail && (
-                                    <div style={{ fontSize: '12px', color: '#b45309', background: '#fef3c7', padding: '8px', borderRadius: '6px', marginBottom: '10px' }}>
-                                        No artisan linked. Assign an artisan to this order first.
-                                    </div>
-                                )}
-                                {order.artisanEmail && <Row label="Pickup From" value={order.artisanEmail} />}
-                                <button onClick={handleDelhivery} disabled={delhiveryLoading || !order.artisanEmail} style={{ ...S.primaryBtn, background: order.artisanEmail ? '#059669' : '#9ca3af', marginTop: '10px' }}>
+                            <Section title="Auto-Ship via Delhivery">
+                                <button onClick={handleDelhivery} disabled={delhiveryLoading} style={{ ...S.primaryBtn, background: '#059669', marginTop: '10px' }}>
                                     <Truck size={15} /> {delhiveryLoading ? 'Creating...' : 'Create Delhivery Consignment'}
                                 </button>
                             </Section>

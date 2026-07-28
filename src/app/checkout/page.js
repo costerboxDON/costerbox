@@ -35,7 +35,6 @@ function CheckoutContent() {
         phone: "", address: "", city: "", state: "", zip: "",
     });
 
-    const [paymentMode, setPaymentMode] = useState('full'); // 'full' or 'partial'
     const [paymentNetworkMethod, setPaymentNetworkMethod] = useState('online'); // 'online' or 'cod'
 
     // --- INITIALIZE CHECKOUT ITEMS ---
@@ -100,39 +99,17 @@ function CheckoutContent() {
 
     const calculateTotals = () => {
         let totalRaw = 0;
-        let totalPayable = 0;
-        let totalPending = 0;
-
-        const hasCustomItems = itemsToCheckout.some(item =>
-            item.isCustomizable || item.category?.toLowerCase() === 'hoops' || item.custom_metadata?.is_custom
-        );
 
         itemsToCheckout.forEach(item => {
-            const isCustom = item.isCustomizable || item.category?.toLowerCase() === 'hoops' || item.custom_metadata?.is_custom;
-
-            // If it's already a partial price from the product page, we treat it as is
-            // BUT the new rule says they choose AT checkout.
-            // So we assume item.price is the FULL price here unless already marked as partial.
-
-            let itemFullPrice = safePrice(item.custom_metadata?.total_amount || item.price);
-            let qty = item.quantity || 1;
-            let itemTotal = itemFullPrice * qty;
-
-            if (isCustom && paymentMode === 'partial') {
-                let payable = Math.ceil(itemTotal * 0.7);
-                totalPayable += payable;
-                totalPending += (itemTotal - payable);
-            } else {
-                totalPayable += itemTotal;
-            }
-
-            totalRaw += itemTotal;
+            const itemFullPrice = safePrice(item.price);
+            const qty = item.quantity || 1;
+            totalRaw += itemFullPrice * qty;
         });
 
-        return { totalRaw, totalPayable, totalPending, hasCustomItems };
+        return { totalRaw, totalPayable: totalRaw };
     };
 
-    const { totalRaw, totalPayable, totalPending, hasCustomItems } = calculateTotals();
+    const { totalRaw, totalPayable } = calculateTotals();
 
 
     const handleChange = (e) => {
@@ -202,7 +179,7 @@ function CheckoutContent() {
 
         try {
             // == COD LOGIC ==
-            if (paymentNetworkMethod === 'cod' && !hasCustomItems) {
+            if (paymentNetworkMethod === 'cod') {
                 const safePayload = {
                     userId: user?.uid || "guest",
                     userEmail: user?.email || "guest@example.com",
@@ -215,10 +192,6 @@ function CheckoutContent() {
                             quantity: item.quantity,
                             selectedSize: item.selectedSize || "",
                             image: item.featuredImage || item.media?.[0] || "/placeholder.jpg",
-                            isCustom: false,
-                            paymentType: 'full',
-                            totalItemAmount: p,
-                            dueItemAmount: p
                         };
                     }),
                     shipping: { ...formData },
@@ -233,7 +206,6 @@ function CheckoutContent() {
                     },
                     orderId: `ORD-COD-${Date.now()}-${Math.floor(Math.random() * 1000)}`,
                     status: "unpaid",
-                    isCustomOrder: false,
                     createdAt: serverTimestamp()
                 };
 
@@ -321,7 +293,6 @@ function CheckoutContent() {
                             userId: user?.uid || "guest",
                             userEmail: user?.email || "guest@example.com",
 
-                            // UPDATED: Store Items Array
                             items: itemsToCheckout.map(item => {
                                 const p = safePrice(item.price);
                                 return {
@@ -331,10 +302,6 @@ function CheckoutContent() {
                                     quantity: item.quantity,
                                     selectedSize: item.selectedSize || "",
                                     image: item.featuredImage || item.media?.[0] || "/placeholder.jpg",
-                                    isCustom: !!item.custom_metadata?.is_custom,
-                                    paymentType: item.custom_metadata?.payment_type || 'full',
-                                    totalItemAmount: item.custom_metadata?.total_amount || p,
-                                    dueItemAmount: item.custom_metadata?.due_amount || 0
                                 };
                             }),
 
@@ -345,15 +312,14 @@ function CheckoutContent() {
                                 razorpayOrderId: response.razorpay_order_id,
                                 razorpaySignature: response.razorpay_signature,
                                 paidAmount: totalPayable,
-                                pendingAmount: totalPending,
+                                pendingAmount: 0,
                                 totalAmount: totalRaw,
-                                type: totalPending > 0 ? "PARTIAL_ADVANCE" : "FULL_PAYMENT",
+                                type: "FULL_PAYMENT",
                                 verified: true,
                             },
 
                             orderId: `ORD-${Date.now()}-${Math.floor(Math.random() * 1000)}`,
-                            status: hasCustomItems ? "pending_artisan_acceptance" : "paid",
-                            isCustomOrder: hasCustomItems,
+                            status: "paid",
                             createdAt: serverTimestamp()
                         };
 
@@ -364,14 +330,12 @@ function CheckoutContent() {
                             clearCart();
                         }
 
-                        // Auto-Ship (Only if not custom and fully paid)
-                        if (!hasCustomItems && totalPending === 0) {
-                            fetch('/api/shiprocket/create-order', {
-                                method: 'POST',
-                                headers: { 'Content-Type': 'application/json' },
-                                body: JSON.stringify({ orderId: docRef.id })
-                            }).catch(console.error);
-                        }
+                        // Auto-Ship
+                        fetch('/api/shiprocket/create-order', {
+                            method: 'POST',
+                            headers: { 'Content-Type': 'application/json' },
+                            body: JSON.stringify({ orderId: docRef.id })
+                        }).catch(console.error);
 
                         // Generate Invoice
                         try {
@@ -465,84 +429,39 @@ function CheckoutContent() {
                         ))}
                     </div>
 
-                    {hasCustomItems && (
-                        <div style={{ marginBottom: '20px', padding: '15px', background: '#f0fdf4', borderRadius: '8px', border: '1px solid #bbf7d0' }}>
-                            <h4 style={{ fontSize: '14px', marginBottom: '10px', color: '#166534' }}>Customization Detected:</h4>
-                            <div style={{ display: 'flex', gap: '10px' }}>
-                                <button
-                                    onClick={() => setPaymentMode('full')}
-                                    style={{
-                                        flex: 1, padding: '10px', fontSize: '12px', borderRadius: '6px', border: paymentMode === 'full' ? '2px solid #166534' : '1px solid #ddd',
-                                        background: paymentMode === 'full' ? '#fff' : '#f9f9f9', fontWeight: paymentMode === 'full' ? 'bold' : 'normal', cursor: 'pointer'
-                                    }}
-                                >
-                                    Full Payment
-                                </button>
-                                <button
-                                    onClick={() => setPaymentMode('partial')}
-                                    style={{
-                                        flex: 1, padding: '10px', fontSize: '12px', borderRadius: '6px', border: paymentMode === 'partial' ? '2px solid #166534' : '1px solid #ddd',
-                                        background: paymentMode === 'partial' ? '#fff' : '#f9f9f9', fontWeight: paymentMode === 'partial' ? 'bold' : 'normal', cursor: 'pointer'
-                                    }}
-                                >
-                                    70% Advance
-                                </button>
-                            </div>
-                            <p style={{ fontSize: '11px', marginTop: '8px', color: '#15803d' }}>
-                                * Remaining 30% will be due before dispatch.
-                            </p>
-                        </div>
-                    )}
-
                     <div className="price-row">
                         <span>Subtotal</span>
                         <span>₹{totalRaw.toLocaleString('en-IN')}</span>
                     </div>
-
-                    {totalPending > 0 && (
-                        <div className="price-row" style={{ color: '#166534', fontWeight: 'bold' }}>
-                            <span>Payable Now (Advance)</span>
-                            <span>₹{totalPayable.toLocaleString('en-IN')}</span>
-                        </div>
-                    )}
-
-                    {totalPending > 0 && (
-                        <div className="price-row" style={{ color: '#854d0e' }}>
-                            <span>Pending Balance</span>
-                            <span>₹{totalPending.toLocaleString('en-IN')}</span>
-                        </div>
-                    )}
 
                     <div className="total-row">
                         <span>Total Payable</span>
                         <span>₹{totalPayable.toLocaleString('en-IN')}</span>
                     </div>
 
-                    {!hasCustomItems && (
-                        <div style={{ marginBottom: '20px', padding: '15px', background: '#f5f5f5', borderRadius: '8px', border: '1px solid #ddd' }}>
-                            <h4 style={{ fontSize: '14px', marginBottom: '10px' }}>Payment Method:</h4>
-                            <div style={{ display: 'flex', gap: '10px' }}>
-                                <button
-                                    onClick={(e) => { e.preventDefault(); setPaymentNetworkMethod('online'); }}
-                                    style={{
-                                        flex: 1, padding: '10px', fontSize: '12px', borderRadius: '6px', border: paymentNetworkMethod === 'online' ? '2px solid #1a1a1a' : '1px solid #ddd',
-                                        background: paymentNetworkMethod === 'online' ? '#1a1a1a' : '#fff', color: paymentNetworkMethod === 'online' ? '#fff' : '#1a1a1a', fontWeight: 'bold', cursor: 'pointer'
-                                    }}
-                                >
-                                    Prepaid
-                                </button>
-                                <button
-                                    onClick={(e) => { e.preventDefault(); setPaymentNetworkMethod('cod'); }}
-                                    style={{
-                                        flex: 1, padding: '10px', fontSize: '12px', borderRadius: '6px', border: paymentNetworkMethod === 'cod' ? '2px solid #1a1a1a' : '1px solid #ddd',
-                                        background: paymentNetworkMethod === 'cod' ? '#1a1a1a' : '#fff', color: paymentNetworkMethod === 'cod' ? '#fff' : '#1a1a1a', fontWeight: 'bold', cursor: 'pointer'
-                                    }}
-                                >
-                                    Cash on Delivery
-                                </button>
-                            </div>
+                    <div style={{ marginBottom: '20px', padding: '15px', background: '#f5f5f5', borderRadius: '8px', border: '1px solid #ddd' }}>
+                        <h4 style={{ fontSize: '14px', marginBottom: '10px' }}>Payment Method:</h4>
+                        <div style={{ display: 'flex', gap: '10px' }}>
+                            <button
+                                onClick={(e) => { e.preventDefault(); setPaymentNetworkMethod('online'); }}
+                                style={{
+                                    flex: 1, padding: '10px', fontSize: '12px', borderRadius: '6px', border: paymentNetworkMethod === 'online' ? '2px solid #1a1a1a' : '1px solid #ddd',
+                                    background: paymentNetworkMethod === 'online' ? '#1a1a1a' : '#fff', color: paymentNetworkMethod === 'online' ? '#fff' : '#1a1a1a', fontWeight: 'bold', cursor: 'pointer'
+                                }}
+                            >
+                                Prepaid
+                            </button>
+                            <button
+                                onClick={(e) => { e.preventDefault(); setPaymentNetworkMethod('cod'); }}
+                                style={{
+                                    flex: 1, padding: '10px', fontSize: '12px', borderRadius: '6px', border: paymentNetworkMethod === 'cod' ? '2px solid #1a1a1a' : '1px solid #ddd',
+                                    background: paymentNetworkMethod === 'cod' ? '#1a1a1a' : '#fff', color: paymentNetworkMethod === 'cod' ? '#fff' : '#1a1a1a', fontWeight: 'bold', cursor: 'pointer'
+                                }}
+                            >
+                                Cash on Delivery
+                            </button>
                         </div>
-                    )}
+                    </div>
 
                     <button
                         type="submit"
@@ -550,12 +469,12 @@ function CheckoutContent() {
                         disabled={processing}
                         className="btn-pay"
                     >
-                        {processing ? "Processing..." : paymentNetworkMethod === 'cod' && !hasCustomItems ? `Place COD Order (₹${totalPayable.toLocaleString('en-IN')})` : `Pay ₹${totalPayable.toLocaleString('en-IN')}`}
+                        {processing ? "Processing..." : paymentNetworkMethod === 'cod' ? `Place COD Order (₹${totalPayable.toLocaleString('en-IN')})` : `Pay ₹${totalPayable.toLocaleString('en-IN')}`}
                         {!processing && paymentNetworkMethod === 'online' && <CreditCard size={18} />}
                     </button>
 
                     <p className="secure-note">
-                        <Lock size={12} /> {paymentNetworkMethod === 'cod' && !hasCustomItems ? 'Pay via Cash upon Delivery' : 'SSL Secure Payment via Razorpay'}
+                        <Lock size={12} /> {paymentNetworkMethod === 'cod' ? 'Pay via Cash upon Delivery' : 'SSL Secure Payment via Razorpay'}
                     </p>
                 </div>
             </div>

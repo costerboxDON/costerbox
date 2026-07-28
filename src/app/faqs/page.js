@@ -4,7 +4,7 @@ import '../../styles/policy.css';
 
 export const metadata = {
     title: 'FAQs — Costerbox',
-    description: 'Frequently Asked Questions about Costerbox products, orders, shipping, and customization.',
+    description: 'Frequently Asked Questions about Costerbox products, orders, and shipping.',
 };
 
 const FAQS = [
@@ -14,15 +14,11 @@ const FAQS = [
     },
     {
         question: "How long does delivery take?",
-        answer: "Standard delivery takes 5–7 business days within India. For international orders, please allow 10–15 business days. Custom orders may require additional time depending on complexity."
-    },
-    {
-        question: "Can I customise a product?",
-        answer: "Yes! Most of our products can be customised. You can choose sizes, add tassels, or request bespoke designs. Customisation requires a 70% advance payment, with the balance due on completion."
+        answer: "Standard delivery takes 5–7 business days within India. For international orders, please allow 10–15 business days."
     },
     {
         question: "What is your return and refund policy?",
-        answer: "We accept returns within 7 days of delivery for non-customised products in unused condition. Customised products cannot be returned unless defective. Please refer to our Refund Policy page for more details."
+        answer: "We accept returns within 7 days of delivery for products in unused condition. Please refer to our Refund Policy page for more details."
     },
     {
         question: "How do I track my order?",

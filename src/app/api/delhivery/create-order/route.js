@@ -26,40 +26,7 @@ export async function POST(req) {
         }
         const order = orderSnap.data();
 
-        // 2. Fetch artisan and their pickup address
-        const artisanEmail = order.artisanEmail;
-        if (!artisanEmail) {
-            return NextResponse.json(
-                { success: false, error: 'No artisan linked to this order. Cannot determine pickup address.' },
-                { status: 400 }
-            );
-        }
-
-        const artisanSnap = await getDoc(doc(db, 'users', artisanEmail));
-        if (!artisanSnap.exists()) {
-            return NextResponse.json(
-                { success: false, error: `Artisan profile not found for ${artisanEmail}.` },
-                { status: 400 }
-            );
-        }
-
-        const artisan = artisanSnap.data();
-        const addr = artisan.pickupAddress;
-
-        if (!addr?.line1 || !addr?.city || !addr?.pincode) {
-            return NextResponse.json(
-                {
-                    success: false,
-                    error: `Artisan "${artisan.name || artisanEmail}" has not set a complete pickup address. They need: line1, city, pincode.`
-                },
-                { status: 400 }
-            );
-        }
-
-        // 3. Build shipment payload
-        // Marketplace model: ONE master pickup location + artisan address in seller_* fields.
-        // Delhivery dispatches courier to seller_add for physical pickup — no per-artisan
-        // warehouse registration needed. Requires a Marketplace/Aggregator account with Delhivery.
+        // 2. Build shipment payload — single registered warehouse picks up every order
         const masterPickup = process.env.DELHIVERY_MASTER_PICKUP || 'Primary';
         const isCOD = order.payment?.type === 'COD';
         const totalAmount = Number(
@@ -70,9 +37,6 @@ export async function POST(req) {
         const productDesc = (
             order.items?.map(i => i.name).join(', ') || order.product?.name || 'Product'
         ).substring(0, 100);
-
-        const artisanPin  = addr.pincode.toString().replace(/[^0-9]/g, '');
-        const artisanPhone = (addr.phone || artisan.phone || '9999999999').replace(/[^0-9]/g, '').slice(-10);
 
         const payload = {
             // Delivery (customer) address
@@ -98,16 +62,7 @@ export async function POST(req) {
             waybill:          '',
             pieces_in_shipment: 1,
 
-            // Artisan (seller/pickup) address — Delhivery dispatches courier here
-            seller_name:    (artisan.name || artisanEmail).substring(0, 60),
-            seller_add:     addr.line1.substring(0, 120),
-            seller_city:    addr.city,
-            seller_state:   addr.state || 'Rajasthan',
-            seller_country: 'India',
-            seller_pin:     artisanPin.substring(0, 6),
-            seller_phone:   artisanPhone,
-
-            // Master pickup location (your platform's single registered warehouse)
+            // Single registered warehouse — picks up every order
             pickup_location: { name: masterPickup }
         };
 
@@ -137,8 +92,7 @@ export async function POST(req) {
         return NextResponse.json({
             success: true,
             waybill,
-            artisan: artisan.name || artisanEmail,
-            pickupAddress: `${addr.line1}, ${addr.city} - ${artisanPin}`
+            pickupLocation: masterPickup
         });
 
     } catch (error) {

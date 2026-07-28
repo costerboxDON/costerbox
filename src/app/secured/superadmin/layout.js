@@ -80,9 +80,7 @@ export default function SuperAdminLayout({ children }) {
           <Link href="/secured/superadmin/categories" style={styles.link}>📂 Categories</Link>
           <Link href="/secured/superadmin/manage-products" style={styles.link}>📦 Inventory</Link>
           <Link href="/secured/superadmin/orders" style={styles.link}>🛒 Orders</Link>
-          <Link href="/secured/superadmin/team" style={styles.link}>🎨 Artisans & Payouts</Link>
           <Link href="/secured/superadmin/shipping" style={styles.link}>🚚 Shipping</Link>
-          <Link href="/secured/superadmin/live-chats" style={styles.link}>💬 Live Chats</Link>
           <Link href="/secured/superadmin/blog" style={styles.link}>📝 Blog</Link>
         </nav>
 

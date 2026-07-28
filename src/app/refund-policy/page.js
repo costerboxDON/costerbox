@@ -16,8 +16,8 @@ export default function RefundPolicyPage() {
 
             <h2>Non-Returnable Products</h2>
             <ul>
-                <li>Customized or made-to-order products.</li>
-                <li>Personalized items or artisan-crafted goods.</li>
+                <li>Products marked as final sale.</li>
+                <li>Items showing signs of use or wash.</li>
             </ul>
 
             <h2>Eligible Scenarios for Refund or Replacement</h2>

@@ -1,21 +1,17 @@
 /* src/app/shop/page.js */
 "use client";
 import React, { useState, useEffect, Suspense } from 'react';
-import { useSearchParams, useRouter } from 'next/navigation';
+import { useSearchParams } from 'next/navigation';
 import { db } from '../../lib/firebase';
 import { collection, getDocs } from 'firebase/firestore';
-import { useAuth } from '../../context/AuthContext';
-import ChatWindow from '../../components/ChatWindow';
 import Link from 'next/link';
 import Image from 'next/image';
-import { MessageCircle, ShoppingBag, X, Heart } from 'lucide-react';
+import { ShoppingBag, Heart } from 'lucide-react';
 import { useWishlist } from '../../context/WishlistContext';
 import { isProductActive } from '../../utils/productUtils';
 import '../../styles/shop.css';
 
 function ShopPageContent() {
-    const { user } = useAuth();
-    const router = useRouter();
     const searchParams = useSearchParams();
     const catFromUrl = searchParams.get('cat');
 
@@ -25,9 +21,6 @@ function ShopPageContent() {
     const [loading, setLoading] = useState(true);
     const { isInWishlist, toggleWishlist } = useWishlist();
 
-    // Track which product is currently being discussed
-    const [activeChatProduct, setActiveChatProduct] = useState(null);
-
     // --- FETCH DATA ---
     useEffect(() => {
         const fetchData = async () => {
@@ -36,9 +29,8 @@ function ShopPageContent() {
                 setCategories(catSnap.docs.map(d => d.data().name).filter(Boolean));
 
                 const prodSnap = await getDocs(collection(db, 'products'));
-                // Archive shows ONLY customizable active products
                 const allProds = prodSnap.docs.map(d => ({ id: d.id, ...d.data() }));
-                setProducts(allProds.filter(p => p.isCustomizable === true && isProductActive(p)));
+                setProducts(allProds.filter(isProductActive));
 
                 setLoading(false);
             } catch (error) {
@@ -67,31 +59,10 @@ function ShopPageContent() {
             return false;
         });
 
-    // --- HANDLER: OPEN CHAT ---
-    const handleOpenChat = (product) => {
-        if (!user) {
-            router.push('/secured/login');
-            return;
-        }
-        setActiveChatProduct(product);
-    };
-
     if (loading) return <div style={{ padding: '100px', textAlign: 'center' }}>Loading Archive...</div>;
 
     return (
         <>
-            {/* --- CHAT MODAL OVERLAY --- */}
-            {activeChatProduct && user && (
-                <div style={{ position: 'fixed', inset: 0, zIndex: 50, display: 'flex', alignItems: 'center', justifyContent: 'center', background: 'rgba(0,0,0,0.5)', backdropFilter: 'blur(4px)', padding: '16px' }}>
-                    <ChatWindow
-                        chatId={`inquiry_${user.uid}_${activeChatProduct.id}`}
-                        artisanId={activeChatProduct.artisanId}
-                        productName={activeChatProduct.name}
-                        onClose={() => setActiveChatProduct(null)}
-                    />
-                </div>
-            )}
-
             {/* MOBILE FILTERS */}
             <div className="mobile-filters">
                 <span
@@ -142,7 +113,7 @@ function ShopPageContent() {
                 {/* MAIN CONTENT */}
                 <main className="main-gallery">
                     <div className="gallery-header">
-                        <h1>The Artisan Archive</h1>
+                        <h1>The Archive</h1>
                         <p>Curated pieces from the heart of Rajasthan. Respecting the hands that create.</p>
                     </div>
 
@@ -212,23 +183,6 @@ function ShopPageContent() {
                                 <div className="card-details">
                                     <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '4px' }}>
                                         <span className="p-region">{product.region}</span>
-                                        {product.isCustomizable && (
-                                            <span style={{
-                                                fontSize: '10px',
-                                                textTransform: 'uppercase',
-                                                color: '#1a1a1a',
-                                                letterSpacing: '0.5px',
-                                                border: '1px solid #ddd',
-                                                padding: '2px 6px',
-                                                borderRadius: '2px',
-                                                background: '#f9f9f9',
-                                                display: 'flex',
-                                                alignItems: 'center',
-                                                gap: '3px'
-                                            }}>
-                                                <MessageCircle size={10} /> Customizable
-                                            </span>
-                                        )}
                                     </div>
 
                                     {/* 3. WRAP TITLE IN LINK */}

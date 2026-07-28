@@ -73,7 +73,7 @@ export async function createShiprocketOrder(orderData) {
     });
 }
 
-// 3. Add Pickup Location (For Artisan)
+// 3. Add Pickup Location
 export async function addPickupLocation(locationData) {
     return withRetry(async () => {
         const authToken = await getShiprocketToken();

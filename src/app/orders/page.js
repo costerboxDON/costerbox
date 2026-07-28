@@ -5,8 +5,7 @@ import { collection, query, where, orderBy, getDocs } from 'firebase/firestore';
 import { db } from '../../lib/firebase';
 import { useAuth } from '../../context/AuthContext';
 import Link from 'next/link';
-import { Package, Truck, CheckCircle, ExternalLink, MapPin, MessageCircle } from 'lucide-react';
-import ChatWindow from '../../components/ChatWindow';
+import { Package, Truck, CheckCircle, ExternalLink, MapPin } from 'lucide-react';
 import { useRouter } from 'next/navigation';
 import '../../styles/orders.css';
 
@@ -16,7 +15,6 @@ export default function MyOrdersPage() {
     const [orders, setOrders] = useState([]);
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState(null);
-    const [selectedChatOrder, setSelectedChatOrder] = useState(null);
 
     useEffect(() => {
         if (!authLoading && !user) {
@@ -237,45 +235,6 @@ export default function MyOrdersPage() {
                                                     <p style={{ fontSize: '14px', color: '#111', fontWeight: 600, margin: '0 0 4px' }}>
                                                         ₹{item.paidPrice || item.price || '—'}
                                                     </p>
-
-                                                    {/* CHAT BUTTON FOR CUSTOM ORDERS — only on first item */}
-                                                    {order.isCustomOrder && order.artisanId && idx === 0 && (
-                                                        <button
-                                                            onClick={() => setSelectedChatOrder(order)}
-                                                            style={{
-                                                                marginTop: '8px',
-                                                                display: 'inline-flex', alignItems: 'center', gap: '6px',
-                                                                padding: '7px 12px',
-                                                                background: '#3b82f6', color: '#fff',
-                                                                border: 'none', borderRadius: '6px',
-                                                                cursor: 'pointer', fontSize: '13px', fontWeight: 500
-                                                            }}
-                                                        >
-                                                            <MessageCircle size={15} /> Chat with Artisan
-                                                        </button>
-                                                    )}
-                                                </div>
-
-                                                {/* Right side badges — only on first item to avoid repetition */}
-                                                <div style={{ textAlign: 'right' }}>
-                                                    {idx === 0 && order.isCustomOrder && order.payment?.paidAmount && (
-                                                        <div style={{ fontSize: '12px', color: '#16a34a', fontWeight: 600, marginBottom: '6px' }}>
-                                                            Partial Paid: ₹{order.payment.paidAmount}
-                                                        </div>
-                                                    )}
-                                                    {idx === 0 && order.status === 'pending_artisan_acceptance' && (
-                                                        <div style={{
-                                                            background: '#fffbeb', color: '#92400e',
-                                                            padding: '6px 10px', borderRadius: '8px',
-                                                            fontSize: '11px', fontWeight: 600,
-                                                            border: '1px solid #fde68a',
-                                                            display: 'flex', alignItems: 'center', gap: '6px',
-                                                            whiteSpace: 'nowrap'
-                                                        }}>
-                                                            <div style={{ width: '7px', height: '7px', borderRadius: '50%', background: '#F59E0B', flexShrink: 0 }}></div>
-                                                            Awaiting artisan
-                                                        </div>
-                                                    )}
                                                 </div>
                                             </div>
                                         ))
@@ -305,20 +264,6 @@ export default function MyOrdersPage() {
                             </div>
                         );
                     })}
-                </div>
-            )}
-
-            {/* CHAT MODAL */}
-            {selectedChatOrder && (
-                <div style={{ position: 'fixed', inset: 0, zIndex: 100, display: 'flex', alignItems: 'center', justifyContent: 'center', background: 'rgba(0,0,0,0.5)', backdropFilter: 'blur(4px)', padding: '10px' }}>
-                    <ChatWindow
-                        chatId={`order_${selectedChatOrder.id}`}
-                        artisanId={selectedChatOrder.artisanId}
-                        artisanName={selectedChatOrder.artisanName}
-                        customerId={user.uid}
-                        productName={selectedChatOrder.product?.name}
-                        onClose={() => setSelectedChatOrder(null)}
-                    />
                 </div>
             )}
         </div>

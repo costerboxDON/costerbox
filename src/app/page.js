@@ -8,7 +8,6 @@ import { collection, getDocs, addDoc, serverTimestamp, doc, getDoc } from 'fireb
 import { useWishlist } from '../context/WishlistContext';
 import { Heart } from 'lucide-react';
 import '@/styles/home.css';
-import HomeCustomServices from '@/components/HomeCustomServices';
 import { isProductActive } from '@/utils/productUtils';
 
 export default function HomePage() {
@@ -108,7 +107,21 @@ export default function HomePage() {
   ];
 
   let heroSlides = defaultHeroSlides;
-  if (homeSettings?.heroBanner) {
+  if (Array.isArray(homeSettings?.heroBanners) && homeSettings.heroBanners.length > 0) {
+    // Current multi-banner format
+    heroSlides = homeSettings.heroBanners
+      .filter(b => b && b.image)
+      .map(b => ({
+        image: b.image,
+        subtitle: b.subtitle || 'Welcome to Costerbox',
+        title: b.title || 'CRAFTED WITH LOVE\nFOR YOU',
+        cta: b.cta || 'Shop Collection',
+        link: b.link || '/products',
+        align: b.align || 'center'
+      }));
+    if (heroSlides.length === 0) heroSlides = defaultHeroSlides;
+  } else if (homeSettings?.heroBanner) {
+    // Legacy single-banner format
     if (typeof homeSettings.heroBanner === 'string') {
       heroSlides = [{ image: homeSettings.heroBanner, subtitle: 'Welcome to Costerbox', title: 'CRAFTED WITH LOVE\nFOR YOU', cta: 'Shop Collection', link: '/products', align: 'center' }];
     } else if (homeSettings.heroBanner.image) {
@@ -135,7 +148,7 @@ export default function HomePage() {
   }, [currentSlide, heroSlides.length, goToSlide]);
 
   useEffect(() => {
-    const timer = setInterval(nextSlide, 5000);
+    const timer = setInterval(nextSlide, 3000);
     return () => clearInterval(timer);
   }, [nextSlide]);
 
@@ -434,9 +447,6 @@ export default function HomePage() {
       )}
       </>
       )}
-
-      {/* ============ CUSTOM SERVICES ============ */}
-      <HomeCustomServices />
 
       {/* ============ 6. SHOP BY CATEGORY (Dynamic from Firestore) ============ */}
       {categories.length > 0 && (
