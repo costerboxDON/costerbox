@@ -5,6 +5,7 @@ import { useSearchParams } from 'next/navigation';
 import Link from 'next/link';
 import { db } from '../../lib/firebase';
 import { collection, getDocs } from 'firebase/firestore'; 
+import { isProductActive } from '../../utils/productUtils';
 import '../../styles/search.css';
 
 // --- STATIC PAGES (Instant Results) ---
@@ -37,10 +38,9 @@ function SearchContent() {
         const products = [];
         querySnapshot.forEach((doc) => {
            // We process data once here to make search faster later
-           const data = doc.data();
-           if (String(data.status || 'Active').toLowerCase() === 'active') {
+           const data = { id: doc.id, ...doc.data() };
+           if (isProductActive(data)) {
              products.push({
-               id: doc.id,
                ...data,
                type: 'product',
                // Create a "search string" for super fast checking

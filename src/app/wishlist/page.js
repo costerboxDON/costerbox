@@ -5,6 +5,7 @@ import Link from 'next/link';
 import { useWishlist } from '../../context/WishlistContext';
 import { ShoppingBag, Trash2 } from 'lucide-react';
 import { useCart } from '../../context/CartContext';
+import { isProductActive } from '../../utils/productUtils';
 import '../../styles/shop.css'; // Reusing shop styles for consistency
 
 export default function WishlistPage() {
@@ -102,13 +103,23 @@ export default function WishlistPage() {
                                 ₹{Number(product.price).toLocaleString('en-IN')}
                             </span>
 
-                            <button
-                                onClick={() => handleMoveToCart(product)}
-                                className="add-btn"
-                                style={{ marginTop: '10px', width: '100%', padding: '10px', background: '#1a1a1a', color: '#fff', border: 'none', cursor: 'pointer' }}
-                            >
-                                Move to Cart
-                            </button>
+                            {isProductActive(product) ? (
+                                <button
+                                    onClick={() => handleMoveToCart(product)}
+                                    className="add-btn"
+                                    style={{ marginTop: '10px', width: '100%', padding: '10px', background: '#1a1a1a', color: '#fff', border: 'none', cursor: 'pointer' }}
+                                >
+                                    Move to Cart
+                                </button>
+                            ) : (
+                                <button
+                                    disabled
+                                    className="add-btn"
+                                    style={{ marginTop: '10px', width: '100%', padding: '10px', background: '#e2e8f0', color: '#64748b', border: 'none', cursor: 'not-allowed' }}
+                                >
+                                    Draft / Unavailable
+                                </button>
+                            )}
                         </div>
                     </div>
                 ))}

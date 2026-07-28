@@ -10,6 +10,7 @@ import Link from 'next/link';
 import Image from 'next/image';
 import { MessageCircle, ShoppingBag, X, Heart } from 'lucide-react';
 import { useWishlist } from '../../context/WishlistContext';
+import { isProductActive } from '../../utils/productUtils';
 import '../../styles/shop.css';
 
 function ShopPageContent() {
@@ -37,7 +38,7 @@ function ShopPageContent() {
                 const prodSnap = await getDocs(collection(db, 'products'));
                 // Archive shows ONLY customizable active products
                 const allProds = prodSnap.docs.map(d => ({ id: d.id, ...d.data() }));
-                setProducts(allProds.filter(p => p.isCustomizable === true && String(p.status || 'Active').toLowerCase() === 'active'));
+                setProducts(allProds.filter(p => p.isCustomizable === true && isProductActive(p)));
 
                 setLoading(false);
             } catch (error) {

@@ -9,6 +9,7 @@ import { useWishlist } from '../context/WishlistContext';
 import { Heart } from 'lucide-react';
 import '@/styles/home.css';
 import HomeCustomServices from '@/components/HomeCustomServices';
+import { isProductActive } from '@/utils/productUtils';
 
 export default function HomePage() {
   // ========= STATE =========
@@ -58,22 +59,21 @@ export default function HomePage() {
   }, []);
 
   // ========= DERIVE PRODUCT SECTIONS FROM TAGS =========
-  const isActiveProduct = p => String(p.status || 'Active').toLowerCase() === 'active';
   const hasManagedProducts = homeSettings?.homeProducts?.length > 0;
   const managedProducts = hasManagedProducts 
-    ? allProducts.filter(p => homeSettings.homeProducts.includes(p.id) && isActiveProduct(p))
+    ? allProducts.filter(p => homeSettings.homeProducts.includes(p.id) && isProductActive(p))
     : [];
   const newArrivals = allProducts.filter(p =>
-    Array.isArray(p.tags) && p.tags.includes('new-arrival') && isActiveProduct(p)
+    Array.isArray(p.tags) && p.tags.includes('new-arrival') && isProductActive(p)
   ).slice(0, 8);
 
   const bestsellers = allProducts.filter(p =>
-    Array.isArray(p.tags) && p.tags.includes('bestseller') && isActiveProduct(p)
+    Array.isArray(p.tags) && p.tags.includes('bestseller') && isProductActive(p)
   ).slice(0, 8);
 
   // Featured products (fallback to latest if no tags)
   const featuredProducts = allProducts.filter(p =>
-    Array.isArray(p.tags) && p.tags.includes('featured') && isActiveProduct(p)
+    Array.isArray(p.tags) && p.tags.includes('featured') && isProductActive(p)
   ).slice(0, 8);
 
   // Get product image
@@ -256,8 +256,7 @@ export default function HomePage() {
     const product = allProducts.find(p => {
       const pCat = String(p.category || "").trim().toLowerCase();
       const matches = pCat === safeCatName || pCat.replace(/s$/, '') === normCatName;
-      const isActive = String(p.status || "").toLowerCase() === 'active';
-      return matches && isActive && (p.featuredImage || (p.media && p.media.length > 0));
+      return matches && isProductActive(p) && (p.featuredImage || (p.media && p.media.length > 0));
     });
 
     if (product) return product.featuredImage || product.media[0];
@@ -271,8 +270,7 @@ export default function HomePage() {
     return allProducts.filter(p => {
       const pCat = String(p.category || "").trim().toLowerCase();
       const matches = pCat === safeCatName || pCat.replace(/s$/, '') === normCatName;
-      const isActive = String(p.status || "").toLowerCase() === 'active';
-      return matches && isActive;
+      return matches && isProductActive(p);
     }).length;
   };
 
@@ -427,7 +425,7 @@ export default function HomePage() {
               <Link href="/products" className="section-link">Shop All →</Link>
             </div>
             <div className="products-grid">
-              {allProducts.filter(p => p.status === 'Active').slice(0, 8).map((p) => (
+              {allProducts.filter(isProductActive).slice(0, 8).map((p) => (
                 <ProductCard key={p.id} product={p} />
               ))}
             </div>

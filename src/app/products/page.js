@@ -9,6 +9,7 @@ import Link from 'next/link';
 import Image from 'next/image';
 import { ShoppingBag, Heart } from 'lucide-react';
 import { useWishlist } from '../../context/WishlistContext';
+import { isProductActive } from '../../utils/productUtils';
 import '../../styles/shop.css';
 
 function ProductsPageContent() {
@@ -33,7 +34,7 @@ function ProductsPageContent() {
                 // Products page shows ONLY active products
                 const allProds = prodSnap.docs
                     .map(d => ({ id: d.id, ...d.data() }))
-                    .filter(p => String(p.status || 'Active').toLowerCase() === 'active');
+                    .filter(isProductActive);
                 setProducts(allProds);
 
                 setLoading(false);

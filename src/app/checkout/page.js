@@ -5,6 +5,7 @@ import { doc, getDoc, addDoc, collection, serverTimestamp } from "firebase/fires
 import { db } from "../../lib/firebase";
 import { useAuth } from "../../context/AuthContext";
 import { useCart } from "../../context/CartContext";
+import { isProductActive } from "../../utils/productUtils";
 import Script from "next/script";
 import { Lock, CreditCard, MapPin } from "lucide-react";
 import "../../styles/checkout.css";
@@ -46,9 +47,13 @@ function CheckoutContent() {
                     const docRef = doc(db, "products", productId);
                     const snap = await getDoc(docRef);
                     if (snap.exists()) {
-                        const data = snap.data();
+                        const data = { id: snap.id, ...snap.data() };
+                        if (!isProductActive(data)) {
+                            alert("This product is in draft mode and not available for purchase.");
+                            router.push("/products");
+                            return;
+                        }
                         const singleItem = {
-                            id: snap.id,
                             ...data,
                             selectedSize: directSize || (data.sizes?.[0]) || "Standard",
                             quantity: 1,
@@ -64,11 +69,12 @@ function CheckoutContent() {
                 }
             } else {
                 // === MODE B: CART CHECKOUT ===
-                if (cartItems.length === 0) {
-                    // If cart is empty and no direct buy, redirect
+                const validActiveItems = cartItems.filter(isProductActive);
+                if (validActiveItems.length < cartItems.length) {
+                    alert("Some items in your cart are currently in draft or unavailable and have been removed.");
                 }
                 // Sanitize items from cart
-                setItemsToCheckout(cartItems.map(item => ({
+                setItemsToCheckout(validActiveItems.map(item => ({
                     ...item,
                     price: safePrice(item.price)
                 })));

@@ -7,6 +7,7 @@ import { db } from '../../../lib/firebase';
 import { useAuth } from '../../../context/AuthContext';
 import { useCart } from '../../../context/CartContext';
 import { useWishlist } from '../../../context/WishlistContext';
+import { isProductActive } from '../../../utils/productUtils';
 import ChatWindow from '../../../components/ChatWindow';
 import Image from 'next/image';
 import { ShoppingCart, CreditCard, MessageCircle, ArrowLeft, AlertTriangle, ChevronDown, X, Ruler, Truck, Droplets, HelpCircle, Layers, Heart } from 'lucide-react';
@@ -16,7 +17,7 @@ import '../../../styles/size_guide.css';
 export default function ProductDetailsPage() {
     const params = useParams();
     const router = useRouter();
-    const { user } = useAuth();
+    const { user, role } = useAuth();
     const { addToCart } = useCart();
     const { isInWishlist, toggleWishlist } = useWishlist();
 
@@ -62,7 +63,7 @@ export default function ProductDetailsPage() {
                     }
                 }
 
-                if (data && String(data.status || 'Active').toLowerCase() !== 'active') {
+                if (data && !isProductActive(data) && role !== 'superadmin' && role !== 'admin') {
                     data = null;
                 }
 

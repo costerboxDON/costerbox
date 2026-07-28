@@ -2,6 +2,8 @@
 "use client";
 import React, { createContext, useContext, useState, useEffect } from 'react';
 
+import { isProductActive } from '../utils/productUtils';
+
 const CartContext = createContext();
 
 export function useCart() {
@@ -12,12 +14,14 @@ export function CartProvider({ children }) {
     const [cartItems, setCartItems] = useState([]);
     const [isCartOpen, setIsCartOpen] = useState(false); // For future slide-out cart if needed
 
-    // Load cart from localStorage on mount
+    // Load cart from localStorage on mount & filter out draft/unavailable items
     useEffect(() => {
         const storedCart = localStorage.getItem('costerbox_cart');
         if (storedCart) {
             try {
-                setCartItems(JSON.parse(storedCart));
+                const parsed = JSON.parse(storedCart);
+                const activeOnly = Array.isArray(parsed) ? parsed.filter(isProductActive) : [];
+                setCartItems(activeOnly);
             } catch (error) {
                 console.error("Failed to parse cart", error);
             }
@@ -31,6 +35,10 @@ export function CartProvider({ children }) {
 
     // Add item (or update quantity if exists)
     const addToCart = (product, size, qty = 1) => {
+        if (!isProductActive(product)) {
+            alert("This product is currently in draft mode and not available for purchase.");
+            return;
+        }
         setCartItems(prev => {
             // Check if item specific to ID + Size exists
             const existingIndex = prev.findIndex(item => item.id === product.id && item.selectedSize === size);
