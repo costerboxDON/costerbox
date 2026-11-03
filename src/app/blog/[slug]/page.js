@@ -1,5 +1,6 @@
 /* src/app/blog/[slug]/page.js */
 "use client";
+import { cleanRichText } from '../../../utils/productUtils';
 import React, { useState, useEffect } from 'react';
 import Link from 'next/link';
 import { useParams } from 'next/navigation';
@@ -188,7 +189,7 @@ export default function SingleBlogPost() {
                     {/* Article Content */}
                     <div
                         className="single-post__content"
-                        dangerouslySetInnerHTML={{ __html: post.content }}
+                        dangerouslySetInnerHTML={{ __html: cleanRichText(post.content) }}
                     />
                 </main>
 

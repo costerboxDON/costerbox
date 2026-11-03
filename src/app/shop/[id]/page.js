@@ -7,7 +7,7 @@ import { db } from '../../../lib/firebase';
 import { useAuth } from '../../../context/AuthContext';
 import { useCart } from '../../../context/CartContext';
 import { useWishlist } from '../../../context/WishlistContext';
-import { isProductActive } from '../../../utils/productUtils';
+import { isProductActive, cleanRichText } from '../../../utils/productUtils';
 import Image from 'next/image';
 import { ArrowLeft, ChevronDown, X, Ruler, Truck, Droplets, HelpCircle, Layers, Heart } from 'lucide-react';
 import '../../../styles/product.css';
@@ -175,7 +175,7 @@ export default function ProductDetailsPage() {
                                     style={{ width: '100%', height: 'auto', borderRadius: '8px' }}
                                 />
                             ) : product.sizeGuide && product.sizeGuide !== '<p><br></p>' ? (
-                                <div dangerouslySetInnerHTML={{ __html: product.sizeGuide }} />
+                                <div dangerouslySetInnerHTML={{ __html: cleanRichText(product.sizeGuide) }} />
                             ) : (
                                 <>
                                     <table className="size-guide-table">
@@ -362,7 +362,7 @@ export default function ProductDetailsPage() {
                         <h3>About this piece</h3>
                         <div className="pdp-description-text">
                             {product.description ? (
-                                <div dangerouslySetInnerHTML={{ __html: product.description }} />
+                                <div dangerouslySetInnerHTML={{ __html: cleanRichText(product.description) }} />
                             ) : (
                                 <p>No description provided.</p>
                             )}
@@ -394,7 +394,7 @@ export default function ProductDetailsPage() {
                                         <ChevronDown size={18} className="pdp-accordion-chevron" />
                                     </button>
                                     <div className="pdp-accordion-body">
-                                        <div className="pdp-accordion-content" dangerouslySetInnerHTML={{ __html: section.content }} />
+                                        <div className="pdp-accordion-content" dangerouslySetInnerHTML={{ __html: cleanRichText(section.content) }} />
                                     </div>
                                 </div>
                             ))}

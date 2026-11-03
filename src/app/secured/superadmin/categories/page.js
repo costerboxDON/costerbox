@@ -4,6 +4,7 @@ import React, { useState, useEffect } from 'react';
 import { db, storage } from '../../../../lib/firebase';
 import { collection, getDocs, addDoc, deleteDoc, doc, query, orderBy, updateDoc, writeBatch } from 'firebase/firestore';
 import { ref, uploadBytes, getDownloadURL, deleteObject } from 'firebase/storage';
+import { compressImage } from '../../../../utils/imageCompress';
 import { Trash2, Plus, ArrowLeft, Edit2, Check, X, Image as ImageIcon, Loader2, Search } from 'lucide-react';
 import { useRouter } from 'next/navigation';
 
@@ -118,8 +119,9 @@ export default function CategoriesPage() {
         if (!file) return;
         setUploadingId(id);
         try {
+            const smallFile = await compressImage(file, { maxEdge: 1200 });
             const fileRef = ref(storage, `categories/${id}_${Date.now()}`);
-            await uploadBytes(fileRef, file);
+            await uploadBytes(fileRef, smallFile);
             const downloadUrl = await getDownloadURL(fileRef);
 
             await updateDoc(doc(db, 'categories', id), {

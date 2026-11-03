@@ -4,6 +4,7 @@ import { db, storage } from '../../../../lib/firebase';
 import { doc, getDoc, setDoc, collection, getDocs } from 'firebase/firestore';
 import { ref, uploadBytes, getDownloadURL } from 'firebase/storage';
 import { Upload as UploadIcon, Save, Image as ImageIcon, X, Plus, ChevronUp, ChevronDown, Trash2 } from 'lucide-react';
+import { compressImage } from '../../../../utils/imageCompress';
 
 const emptyBanner = () => ({
   image: '',
@@ -68,8 +69,10 @@ export default function SuperadminHomePage() {
         let finalImageUrl = banner.image;
 
         if (banner._file) {
-          const imgRef = ref(storage, `home/${Date.now()}_${index}_${banner._file.name}`);
-          await uploadBytes(imgRef, banner._file);
+          // hero banners are wide: allow a larger long edge, still re-encoded to JPEG
+          const heroFile = await compressImage(banner._file, { maxEdge: 2400, maxBytes: 600 * 1024 });
+          const imgRef = ref(storage, `home/${Date.now()}_${index}_${heroFile.name}`);
+          await uploadBytes(imgRef, heroFile);
           finalImageUrl = await getDownloadURL(imgRef);
         }
 

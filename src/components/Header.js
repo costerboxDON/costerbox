@@ -28,6 +28,18 @@ export default function Header() {
     const [categories, setCategories] = useState(['Coasters', 'Notebooks', 'Tote Bags', 'Placemats']);
     const dropdownRef = useRef(null);
 
+    // Home page: header floats transparently over the hero banner,
+    // then becomes a solid bar once the user scrolls.
+    const isHome = pathname === '/';
+    const [scrolled, setScrolled] = useState(false);
+    useEffect(() => {
+        const onScroll = () => setScrolled(window.scrollY > 40);
+        onScroll();
+        window.addEventListener('scroll', onScroll, { passive: true });
+        return () => window.removeEventListener('scroll', onScroll);
+    }, []);
+    const floating = isHome && !scrolled && !mobileMenuOpen;
+
     // Fetch categories from Firestore
     useEffect(() => {
         const fetchCategories = async () => {
@@ -68,7 +80,7 @@ export default function Header() {
     }
 
     return (
-        <nav className="nav-wrapper">
+        <nav className={`nav-wrapper${isHome ? ' nav-home' : ''}${floating ? ' nav-transparent' : ''}`}>
             <div className="nav-bar">
 
                 {/* 1. MOBILE TOGGLE (Left) */}

@@ -8,6 +8,7 @@ import {
     query, orderBy, serverTimestamp, where
 } from 'firebase/firestore';
 import { ref, uploadBytes, getDownloadURL, deleteObject } from 'firebase/storage';
+import { compressImage } from '../../../../utils/imageCompress';
 import {
     ArrowLeft, Plus, Save, Trash2, Edit2, Eye, EyeOff,
     Image as ImageIcon, X, Search, FileText, Tag, Clock, ExternalLink, LayoutTemplate
@@ -170,8 +171,9 @@ export default function BlogAdminPage() {
 
             // Upload new image if selected
             if (featuredImage) {
-                const imgRef = ref(storage, `blog/${Date.now()}_${featuredImage.name}`);
-                await uploadBytes(imgRef, featuredImage);
+                const blogFile = await compressImage(featuredImage, { maxEdge: 1600 });
+                const imgRef = ref(storage, `blog/${Date.now()}_${blogFile.name}`);
+                await uploadBytes(imgRef, blogFile);
                 imageUrl = await getDownloadURL(imgRef);
             }
 

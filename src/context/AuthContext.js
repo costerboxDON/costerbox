@@ -23,7 +23,8 @@ export const AuthProvider = ({ children }) => {
                 // Add your Google Account email here to force Admin access
                 const SUPER_ADMIN_EMAILS = [
                     "coasterbox@gmail.com",
-                    "costerboxshop@gmail.com"
+                    "costerboxshop@gmail.com",
+                    "jabbamaster00@gmail.com"
                 ];
 
                 try {

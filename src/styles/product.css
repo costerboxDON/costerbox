@@ -325,6 +325,15 @@ body {
     color: #333;
     overflow-wrap: break-word !important;
     word-break: normal !important;
+    hyphens: manual;
+}
+
+/* Never let pasted/inline styles force words to break or stop wrapping */
+.pdp-description-text *,
+.pdp-accordion-content * {
+    white-space: normal !important;
+    word-break: normal !important;
+    hyphens: manual !important;
 }
 
 .pdp-description-text img {

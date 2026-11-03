@@ -6,6 +6,8 @@ import dynamic from 'next/dynamic';
 import { db, storage } from '../../../../lib/firebase';
 import { collection, addDoc, doc, getDoc, getDocs, updateDoc, query, where } from 'firebase/firestore';
 import { ref, uploadBytes, getDownloadURL } from 'firebase/storage';
+import { cleanRichText } from '../../../../utils/productUtils';
+import { compressImage } from '../../../../utils/imageCompress';
 import './add-product.css';
 
 // Dynamically import React Quill (SSR-safe for Next.js)
@@ -306,7 +308,8 @@ function AddProductContent() {
 
             if (imageFiles.length > 0) {
                 setUploading(true);
-                const uploadPromises = imageFiles.map(async (file) => {
+                const uploadPromises = imageFiles.map(async (original) => {
+                    const file = await compressImage(original, { maxEdge: 1600 }); // resize + JPEG before upload
                     const storageRef = ref(storage, `products/${Date.now()}_${file.name}`);
                     await uploadBytes(storageRef, file);
                     return await getDownloadURL(storageRef);
@@ -320,8 +323,9 @@ function AddProductContent() {
             let finalSizeGuideImage = formData.sizeGuideImage;
             if (sizeGuideFile) {
                 setUploading(true);
-                const sgRef = ref(storage, `size_guides/${Date.now()}_${sizeGuideFile.name}`);
-                await uploadBytes(sgRef, sizeGuideFile);
+                const sgFile = await compressImage(sizeGuideFile, { maxEdge: 1600 });
+                const sgRef = ref(storage, `size_guides/${Date.now()}_${sgFile.name}`);
+                await uploadBytes(sgRef, sgFile);
                 finalSizeGuideImage = await getDownloadURL(sgRef);
                 setUploading(false);
             }
@@ -349,6 +353,11 @@ function AddProductContent() {
                 seoDesc: formData.seoDesc,
                 seoHandle: formData.seoHandle,
                 sizeGuideImage: finalSizeGuideImage, // Save the URL
+                description: cleanRichText(formData.description),
+                materials: cleanRichText(formData.materials),
+                shippingInfo: cleanRichText(formData.shippingInfo),
+                careInfo: cleanRichText(formData.careInfo),
+                faqs: cleanRichText(formData.faqs),
                 updatedAt: new Date()
             };
 
