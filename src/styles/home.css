@@ -1101,3 +1101,43 @@
     text-align: center;
   }
 }
+
+/* ============ MOBILE-ONLY HERO BANNERS ============ */
+.hero-mobile {
+  display: none; /* never shown on desktop */
+}
+
+@media (max-width: 900px) {
+  .hero-mobile {
+    display: block;
+    position: relative;
+    width: 100%;
+    aspect-ratio: 9 / 16; /* full portrait */
+    overflow: hidden;
+    background: #111;
+  }
+
+  .hero-mobile-slide {
+    position: absolute;
+    inset: 0;
+    opacity: 0;
+    transition: opacity 0.8s ease-in-out;
+    z-index: 1;
+  }
+
+  .hero-mobile-slide.active {
+    opacity: 1;
+    z-index: 2;
+  }
+
+  .hero-mobile-link {
+    display: block;
+    position: absolute;
+    inset: 0;
+  }
+
+  /* When mobile banners exist, hide the regular hero on mobile */
+  .hero-slider--has-mobile {
+    display: none;
+  }
+}

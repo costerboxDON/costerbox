@@ -13,6 +13,7 @@ import { isProductActive } from '@/utils/productUtils';
 export default function HomePage() {
   // ========= STATE =========
   const [currentSlide, setCurrentSlide] = useState(0);
+  const [currentMobileSlide, setCurrentMobileSlide] = useState(0);
   const [isTransitioning, setIsTransitioning] = useState(false);
   const [currentTestimonial, setCurrentTestimonial] = useState(0);
 
@@ -136,6 +137,11 @@ export default function HomePage() {
     }
   }
 
+  // Mobile-only banners (managed in Admin > Home Setup > Mobile Banner Settings)
+  const mobileSlides = Array.isArray(homeSettings?.mobileBanners)
+    ? homeSettings.mobileBanners.filter(b => b && b.image)
+    : [];
+
   const goToSlide = useCallback((index) => {
     if (isTransitioning) return;
     setIsTransitioning(true);
@@ -151,6 +157,14 @@ export default function HomePage() {
     const timer = setInterval(nextSlide, 3000);
     return () => clearInterval(timer);
   }, [nextSlide]);
+
+  useEffect(() => {
+    if (mobileSlides.length < 2) return;
+    const timer = setInterval(() => {
+      setCurrentMobileSlide((prev) => (prev + 1) % mobileSlides.length);
+    }, 3000);
+    return () => clearInterval(timer);
+  }, [mobileSlides.length]);
 
   // ========= TESTIMONIALS =========
   const testimonials = [
@@ -321,7 +335,47 @@ export default function HomePage() {
 
 
       {/* ============ 2. HERO SLIDER ============ */}
-      <section className="hero-slider">
+      {/* Mobile-only banners: visible only on small screens */}
+      {mobileSlides.length > 0 && (
+        <section className="hero-mobile">
+          {mobileSlides.map((slide, index) => {
+            const inner = (
+              <Image
+                src={slide.image}
+                alt="Costerbox banner"
+                fill
+                style={{ objectFit: 'cover', objectPosition: 'center' }}
+                priority={index === 0}
+                sizes="100vw"
+              />
+            );
+            return (
+              <div
+                key={index}
+                className={`hero-mobile-slide ${index === (currentMobileSlide % mobileSlides.length) ? 'active' : ''}`}
+              >
+                {slide.link ? (
+                  <Link href={slide.link} className="hero-mobile-link" aria-label="View banner">{inner}</Link>
+                ) : inner}
+              </div>
+            );
+          })}
+          {mobileSlides.length > 1 && (
+            <div className="hero-dots">
+              {mobileSlides.map((_, index) => (
+                <button
+                  key={index}
+                  aria-label={`Banner ${index + 1}`}
+                  className={`hero-dot ${index === (currentMobileSlide % mobileSlides.length) ? 'active' : ''}`}
+                  onClick={() => setCurrentMobileSlide(index)}
+                />
+              ))}
+            </div>
+          )}
+        </section>
+      )}
+
+      <section className={`hero-slider${mobileSlides.length > 0 ? ' hero-slider--has-mobile' : ''}`}>
         {heroSlides.map((slide, index) => (
           <div
             key={index}

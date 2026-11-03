@@ -3,7 +3,7 @@ import React, { useState, useEffect } from 'react';
 import { db, storage } from '../../../../lib/firebase';
 import { doc, getDoc, setDoc, collection, getDocs } from 'firebase/firestore';
 import { ref, uploadBytes, getDownloadURL } from 'firebase/storage';
-import { Upload as UploadIcon, Save, Image as ImageIcon, X, Plus, ChevronUp, ChevronDown, Trash2 } from 'lucide-react';
+import { Upload as UploadIcon, Save, Image as ImageIcon, X, Plus, ChevronUp, ChevronDown, Trash2, Smartphone } from 'lucide-react';
 import { compressImage } from '../../../../utils/imageCompress';
 
 const emptyBanner = () => ({
@@ -17,8 +17,17 @@ const emptyBanner = () => ({
   _preview: '',
 });
 
+// Mobile banners: image + optional link only (text is baked into the image)
+const emptyMobileBanner = () => ({
+  image: '',
+  link: '',
+  _file: null,
+  _preview: '',
+});
+
 export default function SuperadminHomePage() {
   const [heroBanners, setHeroBanners] = useState([emptyBanner()]);
+  const [mobileBanners, setMobileBanners] = useState([]); // empty = mobile uses the normal hero
   const [homeProducts, setHomeProducts] = useState([]);
   const [allProducts, setAllProducts] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -51,6 +60,10 @@ export default function SuperadminHomePage() {
           } else {
             setHeroBanners([{ ...emptyBanner(), ...data.heroBanner, _preview: data.heroBanner.image || '' }]);
           }
+        }
+
+        if (Array.isArray(data.mobileBanners)) {
+          setMobileBanners(data.mobileBanners.map(b => ({ ...emptyMobileBanner(), ...b, _preview: b.image || '' })));
         }
 
         if (data.homeProducts) setHomeProducts(data.homeProducts);
@@ -86,16 +99,32 @@ export default function SuperadminHomePage() {
         };
       }));
 
+      // Mobile-only banners (portrait images, shown only on phone-width screens)
+      const finalMobileBanners = (await Promise.all(mobileBanners.map(async (banner, index) => {
+        let finalImageUrl = banner.image;
+
+        if (banner._file) {
+          const mFile = await compressImage(banner._file, { maxEdge: 1920, maxBytes: 600 * 1024 });
+          const imgRef = ref(storage, `home/mobile_${Date.now()}_${index}_${mFile.name}`);
+          await uploadBytes(imgRef, mFile);
+          finalImageUrl = await getDownloadURL(imgRef);
+        }
+
+        return { image: finalImageUrl, link: (banner.link || '').trim() };
+      }))).filter(b => b.image); // drop slots with no image
+
       await setDoc(doc(db, 'siteSettings', 'home'), {
         heroBanners: finalBanners,
+        mobileBanners: finalMobileBanners,
         homeProducts
       }, { merge: true });
 
       setHeroBanners(finalBanners.map(b => ({ ...emptyBanner(), ...b, _preview: b.image })));
+      setMobileBanners(finalMobileBanners.map(b => ({ ...emptyMobileBanner(), ...b, _preview: b.image })));
       alert("Home page settings saved successfully!");
     } catch (err) {
       console.error(err);
-      alert("Failed to save settings.");
+      alert("Failed to save settings: " + (err?.code || err?.message || 'unknown error'));
     }
     setSaving(false);
   };
@@ -134,6 +163,29 @@ export default function SuperadminHomePage() {
 
   const moveBanner = (index, direction) => {
     setHeroBanners(prev => {
+      const next = [...prev];
+      const target = index + direction;
+      if (target < 0 || target >= next.length) return prev;
+      [next[index], next[target]] = [next[target], next[index]];
+      return next;
+    });
+  };
+
+  // Mobile banner handlers
+  const addMobileBanner = () => setMobileBanners(prev => [...prev, emptyMobileBanner()]);
+  const removeMobileBanner = (index) => setMobileBanners(prev => prev.filter((_, i) => i !== index));
+  const handleMobileImageSelect = (index, file) => {
+    if (!file || !file.type?.startsWith('image/')) return;
+    setMobileBanners(prev => prev.map((b, i) => i === index ? { ...b, _file: file, _preview: URL.createObjectURL(file) } : b));
+  };
+  const removeMobileImage = (index) => {
+    setMobileBanners(prev => prev.map((b, i) => i === index ? { ...b, _file: null, _preview: '', image: '' } : b));
+  };
+  const handleMobileLinkChange = (index, value) => {
+    setMobileBanners(prev => prev.map((b, i) => i === index ? { ...b, link: value } : b));
+  };
+  const moveMobileBanner = (index, direction) => {
+    setMobileBanners(prev => {
       const next = [...prev];
       const target = index + direction;
       if (target < 0 || target >= next.length) return prev;
@@ -303,6 +355,103 @@ export default function SuperadminHomePage() {
           }}
         >
           <Plus size={16} /> Add Banner
+        </button>
+      </div>
+
+      {/* ============ MOBILE BANNER SETTINGS ============ */}
+      <div style={{ background: '#fff', padding: '25px', borderRadius: '12px', border: '1px solid #eee', marginBottom: '30px' }}>
+        <h2 style={{ fontSize: '18px', fontWeight: 'bold', marginBottom: '20px', display: 'flex', alignItems: 'center', gap: '10px' }}>
+          <Smartphone size={20} /> Mobile Banner Settings
+        </h2>
+        <p style={{ fontSize: '13px', color: '#666', marginBottom: '6px' }}>
+          These banners are shown <strong>only on mobile screens</strong> (phones, 900px wide or less) and never on desktop.
+          If you add none, mobile visitors see the normal hero banners above.
+        </p>
+        <p style={{ fontSize: '13px', color: '#666', marginBottom: '20px' }}>
+          Recommended image: full portrait <strong>1080 x 1920 px (9:16)</strong>. Put any text inside the image itself. Banners rotate every 3 seconds.
+        </p>
+
+        <div style={{ display: 'flex', flexDirection: 'column', gap: '20px' }}>
+          {mobileBanners.map((banner, index) => (
+            <div key={index} style={{ border: '1px solid #e5e7eb', borderRadius: '10px', padding: '20px', background: '#fafafa' }}>
+              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '15px' }}>
+                <span style={{ fontSize: '13px', fontWeight: '700', color: '#666' }}>Mobile Banner {index + 1}</span>
+                <div style={{ display: 'flex', gap: '6px' }}>
+                  <button onClick={() => moveMobileBanner(index, -1)} disabled={index === 0} title="Move up" style={iconBtnStyle(index === 0)}>
+                    <ChevronUp size={15} />
+                  </button>
+                  <button onClick={() => moveMobileBanner(index, 1)} disabled={index === mobileBanners.length - 1} title="Move down" style={iconBtnStyle(index === mobileBanners.length - 1)}>
+                    <ChevronDown size={15} />
+                  </button>
+                  <button onClick={() => removeMobileBanner(index)} title="Remove banner" style={{ ...iconBtnStyle(false), color: '#dc2626' }}>
+                    <Trash2 size={15} />
+                  </button>
+                </div>
+              </div>
+
+              <div style={{ display: 'flex', gap: '20px', flexWrap: 'wrap', alignItems: 'flex-start' }}>
+                <div>
+                  <label style={labelStyle}>Mobile Banner Image</label>
+                  {banner._preview ? (
+                    <div style={{ position: 'relative', width: '180px', borderRadius: '8px', overflow: 'hidden', border: '1px solid #ddd' }}>
+                      <img src={banner._preview} alt="Mobile banner preview" style={{ width: '100%', display: 'block' }} />
+                      <button
+                        onClick={() => removeMobileImage(index)}
+                        style={{ position: 'absolute', top: '8px', right: '8px', background: '#fff', border: 'none', borderRadius: '50%', padding: '5px', cursor: 'pointer', boxShadow: '0 2px 4px rgba(0,0,0,0.1)' }}
+                      >
+                        <X size={14} />
+                      </button>
+                    </div>
+                  ) : (
+                    <div
+                      onDragOver={handleDragOver}
+                      onDrop={(e) => { e.preventDefault(); handleMobileImageSelect(index, e.dataTransfer.files[0]); }}
+                      onClick={() => document.getElementById(`mobile-banner-file-${index}`)?.click()}
+                      style={{ width: '180px', height: '320px', border: '2px dashed #ccc', borderRadius: '8px', display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', textAlign: 'center', cursor: 'pointer', background: '#fff', padding: '10px', boxSizing: 'border-box' }}
+                    >
+                      <UploadIcon size={28} color="#aaa" style={{ marginBottom: '8px' }} />
+                      <p style={{ margin: 0, fontSize: '12px', color: '#666' }}>Click or drag a portrait image</p>
+                      <input
+                        id={`mobile-banner-file-${index}`}
+                        type="file"
+                        accept="image/*"
+                        onChange={(e) => handleMobileImageSelect(index, e.target.files[0])}
+                        style={{ display: 'none' }}
+                      />
+                    </div>
+                  )}
+                </div>
+
+                <div style={{ flex: 1, minWidth: '220px' }}>
+                  <label style={labelStyle}>Link when tapped (optional)</label>
+                  <input
+                    type="text"
+                    placeholder="e.g. /products or /shop/abc123"
+                    value={banner.link}
+                    onChange={e => handleMobileLinkChange(index, e.target.value)}
+                    style={inputStyle}
+                  />
+                </div>
+              </div>
+            </div>
+          ))}
+        </div>
+
+        {mobileBanners.length === 0 && (
+          <p style={{ fontSize: '13px', color: '#999', fontStyle: 'italic', marginBottom: '0' }}>
+            No mobile banners added, so mobile visitors currently see the regular hero banners.
+          </p>
+        )}
+
+        <button
+          onClick={addMobileBanner}
+          style={{
+            marginTop: '20px', display: 'flex', alignItems: 'center', gap: '8px',
+            background: '#fff', border: '1px dashed #999', color: '#333',
+            padding: '10px 18px', borderRadius: '8px', cursor: 'pointer', fontSize: '13px', fontWeight: '600'
+          }}
+        >
+          <Plus size={16} /> Add Mobile Banner
         </button>
       </div>
 
